@@ -88,11 +88,14 @@
         .popup-terulet { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center; padding: 10px; box-sizing: border-box; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
         .popup-terulet.aktiv { opacity: 1; visibility: visible; }
         .popup-terulet h2 { font-size: 1.5rem; color: var(--arany); }
-        .popup-terulet p { font-size: 2rem; font-weight: 700; margin: 10px 0 20px 0; font-family: 'Orbitron'; }
+        .popup-terulet p { font-size: 1.8rem; font-weight: 700; margin: 10px 0 20px 0; font-family: 'Orbitron'; }
+        #dontes-leiras { font-size: 1rem; font-family: 'Roboto'; color: #d1d5db; margin-bottom: 20px; max-width: 600px; }
         .dontes-gombok { display: flex; flex-direction: column; gap: 15px; width: 80%; }
-        .dontes-gomb { font-size: 1.2rem; padding: 15px 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; width: 100%; }
+        .dontes-gomb { font-size: 1.2rem; padding: 15px 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; width: 100%; transition: transform 0.2s; }
+        .dontes-gomb:hover { transform: scale(1.05); }
         #alku-elfogad, #megerosit-igen { background-color: var(--ajanlat-szin); color: black; }
         #alku-elutasit, #megerosit-nem { background-color: var(--penzfa-kiesett); color: white; }
+        #alku-vegso-ajanlat { background-color: var(--arany); color: black; }
         .rejtett { display: none !important; }
 
         @media (min-width: 768px) {
@@ -112,7 +115,7 @@
             .taska-osszeg { font-size: 1.2rem; }
             #ajanlat-tortenet { max-width: 800px; }
             #ajanlat-tortenet h3 { font-size: 1.2rem; } #ajanlat-lista { font-size: 1rem; }
-            .popup-terulet h2 { font-size: 2rem; } .popup-terulet p { font-size: 3.5rem; }
+            .popup-terulet h2 { font-size: 2rem; } .popup-terulet p { font-size: 3rem; }
             .dontes-gombok { flex-direction: row; gap: 30px; width: auto; }
             .dontes-gomb { font-size: 1.5rem; padding: 15px 30px; }
         }
@@ -152,10 +155,12 @@
 
     <div id="dontesi-terulet" class="popup-terulet">
         <h2 id="dontes-cim">A Bankár Ajánlata:</h2>
+        <p id="dontes-leiras"></p>
         <p id="bankar-ajanlata">0 Ft</p>
         <div class="dontes-gombok">
-            <button id="alku-elfogad" class="dontes-gomb">Áll az alku!</button>
             <button id="alku-elutasit" class="dontes-gomb">Nincs alku!</button>
+            <button id="alku-elfogad" class="dontes-gomb">Áll az alku!</button>
+            <button id="alku-vegso-ajanlat" class="dontes-gomb rejtett">Elfogadom a készpénzt!</button>
         </div>
     </div>
     
@@ -169,13 +174,12 @@
     </div>
 
     <script>
-        const MASTER_PRIZES = { /* ... (az előző verzióban lévő teljes nyereménylista változatlan) ... */ };
-        // A MASTER_PRIZES objektum tartalma ugyanaz, mint az előző kódban
+        const MASTER_PRIZES = {};
         MASTER_PRIZES.penz = [ { display: '100 Ft', value: 100 }, { display: '1.000 Ft', value: 1000 }, { display: '5.000 Ft', value: 5000 }, { display: '10.000 Ft', value: 10000 }, { display: '25.000 Ft', value: 25000 }, { display: '50.000 Ft', value: 50000 }, { display: '100.000 Ft', value: 100000 }, { display: '250.000 Ft', value: 250000 }, { display: '500.000 Ft', value: 500000 }, { display: '750.000 Ft', value: 750000 }, { display: '1.000.000 Ft', value: 1000000 }, { display: '1.500.000 Ft', value: 1500000 }, { display: '2.500.000 Ft', value: 2500000 }, { display: '3.000.000 Ft', value: 3000000 }, { display: '5.000.000 Ft', value: 5000000 }, { display: '7.500.000 Ft', value: 7500000 }, { display: '10.000.000 Ft', value: 10000000 }, { display: '15.000.000 Ft', value: 15000000 }, { display: '20.000.000 Ft', value: 20000000 }, { display: '25.000.000 Ft', value: 25000000 }, { display: '50.000.000 Ft', value: 50000000 } ];
         MASTER_PRIZES.targy = [ { display: 'Prémium Kávéfőző', value: 20000 }, { display: 'Robotporszívó', value: 90000 }, { display: 'Életre szóló Túró Rudi', value: 200000 }, { display: 'High-End Gaming PC', value: 800000 }, { display: 'Luxus wellness hétvége', value: 400000 }, { display: 'Karibi Utazás 2 főre', value: 3500000 }, { display: 'Új Autó', value: 20000000 }, { display: 'Lakásfelújítási utalvány', value: 4000000 }, { display: 'Rolex Óra', value: 6000000 } ];
         MASTER_PRIZES.vicc = [ { display: 'Egy Labubu', value: 1 }, { display: 'Laci bácsi fakanala', value: 5 }, { display: 'Egy adag lecsó', value: 500 }, { display: 'Egy ölelés Gunditól', value: 10 }, { display: 'Bólogató kutya a kalaptartóra', value: 250 }, { display: 'Használt teafilter', value: 2 } ];
         
-        const uzenetek = { /* ... (szintén változatlan) ... */ };
+        const uzenetek = {};
         uzenetek.sajatValasztas = ["A legfontosabb döntés! Melyik lesz az?", "Látom a szemedben a főnyereményt! Csak válaszd ki!", "Figyelj! Van egy lila táska is... Merész vagy?"];
         uzenetek.rejtelyesValasztva = ["Hűha! A rejtélyes táskát választottad! A bankár mostantól jobban fog figyelni rád!", "Bátor húzás! Lássuk, mit ér a lila szín szerencséje!"];
         uzenetek.nyitogatasKezdete = ["Remek! Most pedig derítsük ki, hol nincsenek a milliók!", "Kezdődjön a móka! Mutasd az elsőt!"];
@@ -187,43 +191,31 @@
         uzenetek.ajanlatCsere = ["Figyelem, ez nem a szokásos ajánlat!", "A bankár megbolondult! Két táskát adna a tiédért!"];
 
         const targyKommentek = {
-            'Laci bácsi fakanala': "Na, ezzel legalább a pörköltet megkavarhatod. Többet nem ér.",
-            'Egy adag lecsó': "Jó étvágyat! Remélem szereted a hagymát.",
-            'Életre szóló Túró Rudi': "Gratulálok, a napi egy rudi megvan. A milliók már kevésbé...",
-            'Karibi Utazás 2 főre': "Hoppá, valakinek ugrott a nyaralása! Kár érte, már bekészítettem a fürdőgatyám.",
-            'Új Autó': "Hallod ezt a hangot? Ez a motorháztető csapódása. Fájt, mi?",
-            'Rolex Óra': "Az idő pénz, szokták mondani. Most épp a tiéd fogyott el.",
+            'Laci bácsi fakanala': "Na, ezzel legalább a pörköltet megkavarhatod. Többet nem ér.", 'Egy adag lecsó': "Jó étvágyat! Remélem szereted a hagymát.",
+            'Életre szóló Túró Rudi': "Gratulálok, a napi egy rudi megvan. A milliók már kevésbé...", 'Karibi Utazás 2 főre': "Hoppá, valakinek ugrott a nyaralása! Kár érte, már bekészítettem a fürdőgatyám.",
+            'Új Autó': "Hallod ezt a hangot? Ez a motorháztető csapódása. Fájt, mi?", 'Rolex Óra': "Az idő pénz, szokták mondani. Most épp a tiéd fogyott el.",
             'Prémium Kávéfőző': "Egy jó kávé... hogy felébredj ebből a rémálomból, amibe kerültél."
         };
-        const bankarKerdesek = { /* ... (szintén változatlan) ... */ };
+        const bankarKerdesek = {};
         bankarKerdesek.segito = ["Várj csak! Abban a táskában mintha... éreznél valamit? Biztos ez kell?", "Húha... Én a helyedben meggondolnám. De te tudod. Tényleg nyitod?", "Figyelj, adok egy esélyt. Ez az utolsó szavad?"];
         bankarKerdesek.bloff = ["Érdekes választás... Látom, van egy stratégiád. Biztos vagy benne?", "Pontosan azt a táskát? Remek választás... nekem. Biztosan kinyitod?", "Bátor vagy, elismerem. De a bátorság néha butaság. Utoljára kérdezem: ez lesz az?"];
 
         const DOM = {
-            taskaRacs: document.getElementById('taska-racs'), penzfaBal: document.getElementById('penzfa-bal'),
-            penzfaJobb: document.getElementById('penzfa-jobb'), uzenetek: document.getElementById('jatek-uzenet'),
-            kiegeszitoUzenet: document.getElementById('kiegeszito-uzenet'), bekiabalas: document.getElementById('bekiabalas'),
-            valasztottTaskaSzam: document.getElementById('valasztott-taska-szam'), dontesiTerulet: document.getElementById('dontesi-terulet'),
-            dontesCim: document.getElementById('dontes-cim'), bankarAjanlata: document.getElementById('bankar-ajanlata'),
-            alkuElfogad: document.getElementById('alku-elfogad'), alkuElutasit: document.getElementById('alku-elutasit'),
-            pontosIdo: document.getElementById('pontos-ido'), idoKovetkezo: document.getElementById('ido-kovetkezo'),
-            frissitesGomb: document.getElementById('frissites-gomb'), keveresSzoveg: document.getElementById('keveres-szoveg'),
-            ajanlatTortenet: document.getElementById('ajanlat-tortenet'), ajanlatLista: document.getElementById('ajanlat-lista'),
-            megerositesTerulet: document.getElementById('megerosites-terulet'),
-            megerositesKerdes: document.getElementById('megerosites-kerdes'),
-            megerositIgen: document.getElementById('megerosit-igen'),
-            megerositNem: document.getElementById('megerosit-nem'),
+            taskaRacs: document.getElementById('taska-racs'), penzfaBal: document.getElementById('penzfa-bal'), penzfaJobb: document.getElementById('penzfa-jobb'),
+            uzenetek: document.getElementById('jatek-uzenet'), kiegeszitoUzenet: document.getElementById('kiegeszito-uzenet'), bekiabalas: document.getElementById('bekiabalas'),
+            valasztottTaskaSzam: document.getElementById('valasztott-taska-szam'), dontesiTerulet: document.getElementById('dontesi-terulet'), dontesCim: document.getElementById('dontes-cim'),
+            bankarAjanlata: document.getElementById('bankar-ajanlata'), alkuElfogad: document.getElementById('alku-elfogad'), alkuElutasit: document.getElementById('alku-elutasit'),
+            pontosIdo: document.getElementById('pontos-ido'), idoKovetkezo: document.getElementById('ido-kovetkezo'), frissitesGomb: document.getElementById('frissites-gomb'),
+            keveresSzoveg: document.getElementById('keveres-szoveg'), ajanlatTortenet: document.getElementById('ajanlat-tortenet'), ajanlatLista: document.getElementById('ajanlat-lista'),
+            megerositesTerulet: document.getElementById('megerosites-terulet'), megerositesKerdes: document.getElementById('megerosites-kerdes'),
+            megerositIgen: document.getElementById('megerosit-igen'), megerositNem: document.getElementById('megerosit-nem'),
+            alkuVegsoAjanlat: document.getElementById('alku-vegso-ajanlat'), dontesLeiras: document.getElementById('dontes-leiras'),
         };
         
-        let gameState = {
-            allapot: 'kezdes_elott', sajatTaskak: [], taskaErtekek: {}, maradekNyeremenyek: [],
-            aktualisKor: 0, megNyitando: 0, aktivJatekSeed: null, riskFactor: 1.0, rejtelyesAktiv: false,
-            offerHistory: [], aktivTwist: null, nyertOsszeg: 0
-        };
+        let gameState = {};
         const nyitasiSzamlalo = [6, 5, 4, 3, 2, 1, 1, 1, 1, 1];
         let setupRNG, shuffleRNG, gameDecisionRNG;
 
-        // --- SEGÉDFÜGGVÉNYEK ÉS INICIALIZÁLÁS ---
         const mulberry32 = a => () => { let t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
         const formatValuta = ertek => new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(ertek);
         const getJelenlegiSeed = () => Math.floor(Date.now() / (15 * 60 * 1000));
@@ -231,122 +223,88 @@
         const getRandomElem = (tomb, rng) => tomb[Math.floor(rng() * tomb.length)];
         
         function mutassUzenetet(fő, kiegeszito = "", bekiabalas = "") {
-            DOM.uzenetek.textContent = fő;
-            DOM.kiegeszitoUzenet.textContent = kiegeszito;
-            DOM.bekiabalas.textContent = bekiabalas;
+            DOM.uzenetek.textContent = fő; DOM.kiegeszitoUzenet.textContent = kiegeszito; DOM.bekiabalas.textContent = bekiabalas;
         }
 
-        function selectPrizesForGame(rng) { /* ... (Változatlan, mint előzőleg) ... */ 
+        function selectPrizesForGame(rng) {
             const selected = [];
-            const takeFrom = (source, count) => {
-                const shuffled = kever([...source], rng);
-                for(let i=0; i<count; i++) selected.push(shuffled[i]);
-            };
-            selected.push(MASTER_PRIZES.penz[MASTER_PRIZES.penz.length - 1]);
-            selected.push(MASTER_PRIZES.vicc[0]);
-            takeFrom(MASTER_PRIZES.vicc.slice(1), 2);
-            takeFrom(MASTER_PRIZES.penz.slice(0, 5), 3);
-            takeFrom(MASTER_PRIZES.targy.slice(0, 3), 2);
-            takeFrom(MASTER_PRIZES.penz.slice(5, 15), 9);
-            takeFrom(MASTER_PRIZES.targy.slice(3), 2);
-            takeFrom(MASTER_PRIZES.penz.slice(15, MASTER_PRIZES.penz.length-1), 4);
+            const takeFrom = (source, count) => { const shuffled = kever([...source], rng); for(let i=0; i<count; i++) selected.push(shuffled[i]); };
+            selected.push(MASTER_PRIZES.penz[MASTER_PRIZES.penz.length - 1]); selected.push(MASTER_PRIZES.vicc[0]); takeFrom(MASTER_PRIZES.vicc.slice(1), 2);
+            takeFrom(MASTER_PRIZES.penz.slice(0, 5), 3); takeFrom(MASTER_PRIZES.targy.slice(0, 3), 2); takeFrom(MASTER_PRIZES.penz.slice(5, 15), 9);
+            takeFrom(MASTER_PRIZES.targy.slice(3), 2); takeFrom(MASTER_PRIZES.penz.slice(15, MASTER_PRIZES.penz.length-1), 4);
             return selected.map(p => {
-                let type = 'penz';
-                if (MASTER_PRIZES.targy.includes(p)) type = 'targy';
-                if (MASTER_PRIZES.vicc.includes(p)) type = 'vicc';
+                let type = 'penz'; if (MASTER_PRIZES.targy.includes(p)) type = 'targy'; if (MASTER_PRIZES.vicc.includes(p)) type = 'vicc';
                 return {...p, type: type};
             }).sort((a, b) => a.value - b.value);
         }
 
         function init() {
-            gameState.aktivJatekSeed = getJelenlegiSeed();
-            setupRNG = mulberry32(gameState.aktivJatekSeed);
-            shuffleRNG = mulberry32(gameState.aktivJatekSeed + 1);
-            gameDecisionRNG = mulberry32(gameState.aktivJatekSeed + 2);
-            nyeremenyek = selectPrizesForGame(setupRNG);
+            gameState.aktivJatekSeed = getJelenlegiSeed(); setupRNG = mulberry32(gameState.aktivJatekSeed); shuffleRNG = mulberry32(gameState.aktivJatekSeed + 1);
+            gameDecisionRNG = mulberry32(gameState.aktivJatekSeed + 2); nyeremenyek = selectPrizesForGame(setupRNG);
             Object.assign(gameState, { 
-                allapot: 'sajat_valasztas', sajatTaskak: [], taskaErtekek: {}, maradekNyeremenyek: [...nyeremenyek], 
-                aktualisKor: 0, riskFactor: 1.0, rejtelyesAktiv: false, offerHistory: [], aktivTwist: null, nyertOsszeg: 0
+                allapot: 'sajat_valasztas', sajatTaskak: [], taskaErtekek: {}, maradekNyeremenyek: [...nyeremenyek], aktualisKor: 0,
+                riskFactor: 1.0, rejtelyesAktiv: false, offerHistory: [], aktivTwist: null, nyertOsszeg: 0,
+                luckyStreakCounter: 0, unluckyStreakCounter: 0, bankerJustAsked: false
             });
-            document.querySelectorAll('.taska').forEach(t => t.className = 'taska');
-            DOM.valasztottTaskaSzam.textContent = "N/A";
+            document.querySelectorAll('.taska').forEach(t => t.className = 'taska'); DOM.valasztottTaskaSzam.textContent = "N/A";
             DOM.dontesiTerulet.classList.remove('aktiv'); DOM.frissitesGomb.classList.add('rejtett'); DOM.keveresSzoveg.classList.remove('rejtett');
-            DOM.ajanlatTortenet.classList.add('rejtett'); DOM.ajanlatLista.innerHTML = '';
-            mutassUzenetet(getRandomElem(uzenetek.sajatValasztas, gameDecisionRNG));
+            DOM.ajanlatTortenet.classList.add('rejtett'); DOM.ajanlatLista.innerHTML = ''; mutassUzenetet(getRandomElem(uzenetek.sajatValasztas, gameDecisionRNG));
 
             const fele = Math.ceil(nyeremenyek.length / 2);
             const getTipusClass = (ny) => `tipus-${ny.type}${ny.type === 'penz' || ny.type === 'targy' ? (ny.value > 100000 ? '-magas' : '-alacsony') : ''}`;
             DOM.penzfaBal.innerHTML = nyeremenyek.slice(0, fele).map(ny => `<li data-value="${ny.value}" class="penzfa-elem aktiv ${getTipusClass(ny)}">${ny.display}</li>`).join('');
             DOM.penzfaJobb.innerHTML = nyeremenyek.slice(fele).map(ny => `<li data-value="${ny.value}" class="penzfa-elem aktiv ${getTipusClass(ny)}">${ny.display}</li>`).join('');
             
-            DOM.taskaRacs.innerHTML = '';
-            const kevertNyeremenyek = kever([...nyeremenyek], shuffleRNG);
-            const rejtelyesId = Math.floor(setupRNG() * nyeremenyek.length) + 1;
-            
+            DOM.taskaRacs.innerHTML = ''; const kevertNyeremenyek = kever([...nyeremenyek], shuffleRNG); const rejtelyesId = Math.floor(setupRNG() * nyeremenyek.length) + 1;
             for (let i = 1; i <= nyeremenyek.length; i++) {
-                gameState.taskaErtekek[i] = kevertNyeremenyek[i - 1];
-                const taskaElem = document.createElement('div');
-                taskaElem.className = 'taska' + (i === rejtelyesId ? ' rejtelyes' : '');
-                taskaElem.dataset.taskaId = i;
+                gameState.taskaErtekek[i] = kevertNyeremenyek[i - 1]; const taskaElem = document.createElement('div');
+                taskaElem.className = 'taska' + (i === rejtelyesId ? ' rejtelyes' : ''); taskaElem.dataset.taskaId = i;
                 taskaElem.innerHTML = `<div class="taska-front"><div class="taska-szam">${i}</div></div><div class="taska-hatlap"><div class="taska-osszeg">${kevertNyeremenyek[i-1].display}</div></div>`;
-                taskaElem.addEventListener('click', () => taskaKattintas(i));
-                DOM.taskaRacs.appendChild(taskaElem);
+                taskaElem.addEventListener('click', () => taskaKattintas(i)); DOM.taskaRacs.appendChild(taskaElem);
             }
         }
 
-        // --- JÁTÉKMENET LOGIKA ---
         function taskaKattintas(id) {
             const taskaElem = document.querySelector(`.taska[data-taska-id='${id}']`);
             if (!taskaElem || taskaElem.classList.contains('nyitott') || taskaElem.classList.contains('animacio-nyitas') || gameState.allapot.includes('dontes') || gameState.allapot.includes('animacio')) return;
 
             if (gameState.allapot === 'sajat_valasztas') {
-                gameState.sajatTaskak.push(id);
-                taskaElem.classList.add('kivalasztott');
-                DOM.valasztottTaskaSzam.textContent = id;
+                gameState.sajatTaskak.push(id); taskaElem.classList.add('kivalasztott'); DOM.valasztottTaskaSzam.textContent = id;
                 if (taskaElem.classList.contains('rejtelyes')) {
-                    gameState.rejtelyesAktiv = true;
-                    mutassUzenetet(getRandomElem(uzenetek.rejtelyesValasztva, gameDecisionRNG));
-                } else {
-                    mutassUzenetet(getRandomElem(uzenetek.nyitogatasKezdete, gameDecisionRNG));
-                }
+                    gameState.rejtelyesAktiv = true; mutassUzenetet(getRandomElem(uzenetek.rejtelyesValasztva, gameDecisionRNG));
+                } else { mutassUzenetet(getRandomElem(uzenetek.nyitogatasKezdete, gameDecisionRNG)); }
                 setTimeout(() => {
-                    gameState.allapot = 'nyitogatas';
-                    gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor];
+                    gameState.allapot = 'nyitogatas'; gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor];
                     mutassUzenetet(DOM.uzenetek.textContent, `Még ${gameState.megNyitando} táskát kell kinyitnod.`);
                 }, 2000);
 
             } else if ((gameState.allapot === 'nyitogatas' || gameState.allapot === 'alku_elfogadva_kijatszas') && !gameState.sajatTaskak.includes(id)) {
-                // ... (Bankár visszakérdez logika változatlan) ...
+                // ÚJ: Finomított visszakérdezési logika
                 const maradekNagyErtekek = gameState.maradekNyeremenyek.filter(ny => ny.value > 1000000).length;
-                const visszakerdezEsely = 0.25 + (maradekNagyErtekek * 0.05);
-                if (gameState.allapot === 'nyitogatas' && gameState.megNyitando > 0 && gameDecisionRNG() < visszakerdezEsely) {
+                const visszakerdezEsely = 0.18 + (maradekNagyErtekek * 0.03); // Csökkentett esély
+                if (gameState.allapot === 'nyitogatas' && !gameState.bankerJustAsked && gameState.megNyitando > 0 && gameDecisionRNG() < visszakerdezEsely) {
+                    gameState.bankerJustAsked = true; // Ebben a körben már nem kérdez vissza
                     const kivalasztottErtek = gameState.taskaErtekek[id].value;
                     const atlag = gameState.maradekNyeremenyek.reduce((a,b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
                     if (kivalasztottErtek > atlag * 2) { mutassBankarKerdest(id, 'segito'); } 
                     else if (kivalasztottErtek < atlag * 0.2) { mutassBankarKerdest(id, 'bloff'); } 
-                    else { kinyitTaska(id, taskaElem.classList.contains('rejtelyes')); }
-                } else {
-                    kinyitTaska(id, taskaElem.classList.contains('rejtelyes'));
-                }
+                    else { kinyitTaska(id); }
+                } else { kinyitTaska(id); }
             }
         }
 
         function generateBankerComment(nyeremeny) {
-            if (targyKommentek[nyeremeny.display]) {
-                return targyKommentek[nyeremeny.display];
-            }
+            if (targyKommentek[nyeremeny.display]) return targyKommentek[nyeremeny.display];
             if (nyeremeny.value >= 25000000) return "Ennek különösen örülök! Köszönöm!";
             if (nyeremeny.value >= 5000000) return "Látod? Mondtam, hogy rossz lóra teszel.";
             if (nyeremeny.value < 1000) return "Aprópénz. Ezt a portásnak adom borravalónak.";
             if (nyeremeny.value < 50000) return "Ettől még nem leszek szegényebb.";
-            return ""; // Nincs komment
+            return "";
         }
 
-        function kinyitTaska(id, rejtelyesVolt) {
-            // ... (A függvény nagy része változatlan, de a komment generálása beépül) ...
+        function kinyitTaska(id) {
             const taskaElem = document.querySelector(`.taska[data-taska-id='${id}']`);
-            gameState.allapot = gameState.allapot + '_animacio';
-            taskaElem.classList.add('animacio-nyitas');
+            gameState.allapot = gameState.allapot + '_animacio'; taskaElem.classList.add('animacio-nyitas');
             setTimeout(() => {
                 taskaElem.classList.add('nyitott'); taskaElem.classList.remove('animacio-nyitas');
                 const nyeremeny = gameState.taskaErtekek[id];
@@ -354,22 +312,22 @@
                 const atlagErtek = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
                 gameState.maradekNyeremenyek = gameState.maradekNyeremenyek.filter(n => n.value !== nyeremeny.value);
                 
-                let bekiabalas = generateBankerComment(nyeremeny); // ÚJ
-                let főUzenet = "";
+                let bekiabalas = generateBankerComment(nyeremeny); let főUzenet = "";
                 
-                if (nyeremeny.value === nyeremenyek[nyeremenyek.length-1].value) {
-                     főUzenet = uzenetek.legnagyobbTalalat;
-                     if (!bekiabalas) bekiabalas = "TUDTAM! Pontosan tudtam!";
-                } else if (nyeremeny.value > atlagErtek) {
-                    főUzenet = getRandomElem(uzenetek.nagyTalalat, gameDecisionRNG);
+                if (nyeremeny.value > atlagErtek * 1.5) { // Nagyobb tűréshatár a "nagy" találathoz
+                    főUzenet = (nyeremeny.value === nyeremenyek[nyeremenyek.length-1].value) ? uzenetek.legnagyobbTalalat : getRandomElem(uzenetek.nagyTalalat, gameDecisionRNG);
+                    if (!bekiabalas && nyeremeny.value === nyeremenyek[nyeremenyek.length-1].value) bekiabalas = "TUDTAM! Pontosan tudtam!";
                     gameState.riskFactor = Math.min(1.5, gameState.riskFactor * 1.1);
+                    // ÚJ: Széria logika
+                    gameState.unluckyStreakCounter++; gameState.luckyStreakCounter = 0;
                 } else {
                     főUzenet = getRandomElem(uzenetek.kicsiTalalat, gameDecisionRNG);
                     gameState.riskFactor = Math.max(0.5, gameState.riskFactor * 0.9);
+                    // ÚJ: Széria logika
+                    gameState.luckyStreakCounter++; gameState.unluckyStreakCounter = 0;
                 }
                 mutassUzenetet(főUzenet, `${nyeremeny.display} volt a táskában.`, bekiabalas);
                 
-                // ... (A kör vége logika változatlan, mint az előző verzióban) ...
                 gameState.megNyitando--;
                 if (gameState.megNyitando > 0) {
                     const alapAllapot = gameState.allapot.replace('_animacio', '');
@@ -378,13 +336,10 @@
                 } else {
                     if (gameState.allapot.startsWith('alku_elfogadva_kijatszas')) {
                          if (gameState.maradekNyeremenyek.length > 2) {
-                            gameState.aktualisKor++;
-                            gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
+                            gameState.aktualisKor++; gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
                             gameState.allapot = 'alku_elfogadva_kijatszas';
                             setTimeout(() => { mutassUzenetet(`Kijátszás: Következő kör. Nyiss ki ${gameState.megNyitando} táskát!`); }, 2500);
-                        } else {
-                            setTimeout(() => finalReveal(null), 2500);
-                        }
+                        } else { setTimeout(() => finalReveal(null, true), 2500); }
                     } else {
                         gameState.allapot = 'nyitogatas';
                         setTimeout(() => { mutassUzenetet(getRandomElem(uzenetek.ajanlatElott, gameDecisionRNG), "", bekiabalas); }, 2500);
@@ -395,73 +350,70 @@
         }
         
         function csereElfogadasa(id1, id2) {
-            DOM.dontesiTerulet.classList.remove('aktiv');
-            const regiTaskaId = gameState.sajatTaskak[0];
+            DOM.dontesiTerulet.classList.remove('aktiv'); const regiTaskaId = gameState.sajatTaskak[0];
             document.querySelector(`.taska[data-taska-id='${regiTaskaId}']`).classList.remove('kivalasztott');
-            
             gameState.sajatTaskak = [parseInt(id1), parseInt(id2)];
             document.querySelector(`.taska[data-taska-id='${id1}']`).classList.add('kicserelt-sajat');
             document.querySelector(`.taska[data-taska-id='${id2}']`).classList.add('kicserelt-sajat');
             DOM.valasztottTaskaSzam.textContent = `${id1}, ${id2}`;
-
             mutassUzenetet(`CSERE MEGTÖRTÉNT!`, `Mostantól a(z) ${id1}-es és ${id2}-es táska a tiéd. A tartalmuk a legvégén derül ki!`);
-            
-            gameState.offerHistory.push({ round: gameState.aktualisKor + 1, offer: `Csere a(z) ${id1} & ${id2}`, decision: 'Elfogadva' });
-            updateOfferHistoryUI();
-
+            gameState.offerHistory.push({ round: gameState.aktualisKor + 1, offer: `Csere a(z) ${id1} & ${id2}`, decision: 'Elfogadva' }); updateOfferHistoryUI();
             setTimeout(() => {
-                gameState.aktualisKor++;
-                gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
-                gameState.allapot = 'nyitogatas';
+                gameState.aktualisKor++; gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1; gameState.allapot = 'nyitogatas';
                 mutassUzenetet(`A játék folytatódik!`, `Nyiss ki ${gameState.megNyitando} táskát!`);
             }, 4000);
         }
 
-        function finalReveal(nyertesTaskaId) {
+        function finalReveal(nyertesTaskaId, kijatszasVege = false) {
             DOM.dontesiTerulet.classList.remove('aktiv');
             
-            if (gameState.nyertOsszeg > 0) { // Kijátszás vége
+            if (kijatszasVege) {
                 const sajatTaskaTartalma = gameState.sajatTaskak.map(id => gameState.taskaErtekek[id].display).join(' és ');
                 mutassUzenetet(`A kijátszás vége! Garantált nyereményed: ${formatValuta(gameState.nyertOsszeg)}`,
                               `A te táskáidban (${gameState.sajatTaskak.join(', ')}) ez volt: ${sajatTaskaTartalma}.`);
-            } else { // Normál játék vége
+            } else {
                 let nyeremenyekTomb;
-                if(nyertesTaskaId) { // Utolsó csere történt
-                    nyeremenyekTomb = [gameState.taskaErtekek[nyertesTaskaId]];
-                } else { // A játékos megtartotta a sajátját
-                    nyeremenyekTomb = gameState.sajatTaskak.map(id => gameState.taskaErtekek[id]);
-                }
+                if(nyertesTaskaId) { nyeremenyekTomb = [gameState.taskaErtekek[nyertesTaskaId]]; } 
+                else { nyeremenyekTomb = gameState.sajatTaskak.map(id => gameState.taskaErtekek[id]); }
                 
                 const nyeremenyDisplay = nyeremenyekTomb.map(ny => ny.display).join(' + ');
                 const nyeremenyErtek = nyeremenyekTomb.reduce((sum, ny) => sum + (typeof ny.value === 'number' ? ny.value : 0), 0);
                 
                 mutassUzenetet(`Játék vége! A végső nyereményed: ${nyeremenyDisplay}!`, `Összesen: ${formatValuta(nyeremenyErtek)}`);
             }
-
-            document.querySelectorAll('.taska:not(.nyitott)').forEach(t => t.classList.add('nyitott'));
-            vegeJatek();
+            document.querySelectorAll('.taska:not(.nyitott)').forEach(t => t.classList.add('nyitott')); vegeJatek();
         }
 
-        function utolsoDontes() {
-            const masikTaskaId = Array.from(document.querySelectorAll('.taska:not(.nyitott)'))
-                                   .find(t => !gameState.sajatTaskak.includes(parseInt(t.dataset.taskaId))).dataset.taskaId;
-            DOM.dontesCim.textContent = "Az Utolsó Döntés";
-            DOM.bankarAjanlata.innerHTML = `Megtartod a saját táskád (${gameState.sajatTaskak.join(', ')}), vagy cserélsz az utolsó, <strong>${masikTaskaId}</strong>-asra?`;
-            DOM.alkuElfogad.textContent = `CSERÉLEK a ${masikTaskaId}-asra!`;
-            DOM.alkuElutasit.textContent = `MARADOK a sajátomnál!`;
-            DOM.alkuElfogad.onclick = () => finalReveal(parseInt(masikTaskaId));
-            DOM.alkuElutasit.onclick = () => finalReveal(null);
-            DOM.dontesiTerulet.classList.add('aktiv');
-            gameState.allapot = 'dontes_final';
+        function finalShowdown() { // ÁTNEVEZVE: utolsoDontes -> finalShowdown
+            const maradekTaskakElemek = Array.from(document.querySelectorAll('.taska:not(.nyitott)'));
+            const sajatTaskaId = gameState.sajatTaskak[0];
+            const masikTaskaElem = maradekTaskakElemek.find(t => parseInt(t.dataset.taskaId) !== sajatTaskaId);
+            const masikTaskaId = parseInt(masikTaskaElem.dataset.taskaId);
+
+            const sajatTaskaErtek = gameState.taskaErtekek[sajatTaskaId];
+            const masikTaskaErtek = gameState.taskaErtekek[masikTaskaId];
+
+            const vegsoAjanlat = Math.round(((sajatTaskaErtek.value + masikTaskaErtek.value) / 2 * 0.8) / 1000) * 1000;
+
+            DOM.dontesCim.textContent = "Az Utolsó Ajánlat";
+            DOM.dontesLeiras.textContent = `A két táskában: ${sajatTaskaErtek.display} és ${masikTaskaErtek.display}. Itt a vége. Hogyan döntesz?`;
+            DOM.bankarAjanlata.textContent = formatValuta(vegsoAjanlat);
+            
+            DOM.alkuElutasit.textContent = `Megtartom a sajátomat (${sajatTaskaId})!`;
+            DOM.alkuElfogad.textContent = `Cserélek a(z) ${masikTaskaId}-asra!`;
+            DOM.alkuVegsoAjanlat.classList.remove('rejtett');
+            
+            DOM.alkuElutasit.onclick = () => { finalReveal(null); gameState.offerHistory.push({ round: 'Vége', offer: 'Tartás', decision: 'Elfogadva' }); updateOfferHistoryUI(); };
+            DOM.alkuElfogad.onclick = () => { finalReveal(masikTaskaId); gameState.offerHistory.push({ round: 'Vége', offer: 'Csere', decision: 'Elfogadva' }); updateOfferHistoryUI(); };
+            DOM.alkuVegsoAjanlat.onclick = () => {
+                alkuElfogadasa(vegsoAjanlat, true);
+                gameState.offerHistory.push({ round: 'Vége', offer: formatValuta(vegsoAjanlat), decision: 'Elfogadva' }); updateOfferHistoryUI();
+            };
+            
+            DOM.dontesiTerulet.classList.add('aktiv'); gameState.allapot = 'dontes_final';
         }
         
-        // --- A TÖBBI FÜGGVÉNY (VÁLTOZATLAN) ---
-        // A kód többi része, mint pl. mutassBankarKerdest, bankarAjanlatotTesz,
-        // alkuElfogadasa, alkuElutasitasa, updateOfferHistoryUI, idoFrissites, vegeJatek stb.
-        // lényegében változatlanul működik a fentiekkel együtt.
-        // A teljes, működő kódhoz a fenti módosításokat kell integrálni a korábbi verzióba.
-        // (A fenti szkript már tartalmazza ezeket az integrált funkciókat.)
-        function mutassBankarKerdest(id, tipus) { /* ... (Változatlan) ... */
+        function mutassBankarKerdest(id, tipus) {
              gameState.allapot = 'dontes_megerosites';
             const kerdesek = (tipus === 'segito') ? bankarKerdesek.segito : bankarKerdesek.bloff;
             DOM.megerositesKerdes.textContent = getRandomElem(kerdesek, gameDecisionRNG);
@@ -470,47 +422,52 @@
             DOM.megerositIgen.onclick = () => {
                 DOM.megerositesTerulet.classList.remove('aktiv');
                 const eredetiAllapot = gameState.nyertOsszeg > 0 ? 'alku_elfogadva_kijatszas' : 'nyitogatas';
-                gameState.allapot = eredetiAllapot;
-                kinyitTaska(id, document.querySelector(`.taska[data-taska-id='${id}']`).classList.contains('rejtelyes'));
+                gameState.allapot = eredetiAllapot; kinyitTaska(id);
             };
             DOM.megerositNem.onclick = () => {
                 DOM.megerositesTerulet.classList.remove('aktiv');
                 const eredetiAllapot = gameState.nyertOsszeg > 0 ? 'alku_elfogadva_kijatszas' : 'nyitogatas';
-                gameState.allapot = eredetiAllapot;
-                mutassUzenetet("Megfutamodtál! Rendben, válassz egy másik táskát!");
+                gameState.allapot = eredetiAllapot; mutassUzenetet("Megfutamodtál! Rendben, válassz egy másik táskát!");
             };
         }
-        function bankarAjanlatotTesz() { /* ... (Változatlan) ... */
-             const maradekTaskak = document.querySelectorAll('.taska:not(.nyitott)');
-             const sajatTaskakSzama = gameState.sajatTaskak.length;
-            if (maradekTaskak.length - sajatTaskakSzama <= 1) { utolsoDontes(); return; }
+        
+        function bankarAjanlatotTesz() {
+            gameState.bankerJustAsked = false; // Új ajánlatnál reset
+            const maradekTaskak = document.querySelectorAll('.taska:not(.nyitott)');
+            const sajatTaskakSzama = gameState.sajatTaskak.length;
+            if (maradekTaskak.length - sajatTaskakSzama <= 1) { finalShowdown(); return; }
 
             if (gameState.aktualisKor >= 2 && gameState.aktualisKor <= 4 && maradekTaskak.length >= 3 && gameDecisionRNG() < 0.25) {
-                bankarCsereAjanlatotTesz();
-                return;
+                bankarCsereAjanlatotTesz(); return;
             }
 
             const atlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
             let ajanlatAlap = atlag * (0.15 + (gameState.aktualisKor * 0.13));
+            let bekiabalas = "";
+
+            // ÚJ: Széria logika alkalmazása
+            if (gameState.luckyStreakCounter >= 3) {
+                ajanlatAlap *= 1.15; // 15% bónusz
+                bekiabalas = `SZÉP SZÉRIA! Ne bízd el magad, itt egy kis bónusz!`;
+                gameState.luckyStreakCounter = 0; // Reset
+            } else if (gameState.unluckyStreakCounter >= 2) {
+                ajanlatAlap *= 1.05; // 5% "kegyelem"
+                bekiabalas = `Látom, nincs szerencséd. Nesze, egy kis vigaszdíj.`;
+                gameState.unluckyStreakCounter = 0; // Reset
+            }
+            if(bekiabalas) DOM.bekiabalas.textContent = bekiabalas;
             
             if(gameState.rejtelyesAktiv) ajanlatAlap *= 1.15;
-            if(gameState.aktivTwist) {
-                ajanlatAlap *= gameState.aktivTwist.effect;
-                DOM.bekiabalas.textContent = `A ${gameState.aktivTwist.type} érvényesült az ajánlaton!`;
-                gameState.aktivTwist = null;
-            }
-
             const veglegesAjanlat = Math.round(ajanlatAlap / gameState.riskFactor / 1000) * 1000;
 
-            DOM.dontesCim.textContent = "A Bankár Ajánlata:";
-            DOM.bankarAjanlata.textContent = formatValuta(veglegesAjanlat);
+            DOM.dontesCim.textContent = "A Bankár Ajánlata:"; DOM.bankarAjanlata.textContent = formatValuta(veglegesAjanlat);
+            DOM.dontesLeiras.textContent = ""; DOM.alkuVegsoAjanlat.classList.add('rejtett');
             DOM.alkuElfogad.textContent = "Áll az alku!"; DOM.alkuElutasit.textContent = "Nincs alku!";
-            DOM.alkuElfogad.onclick = () => alkuElfogadasa(veglegesAjanlat);
-            DOM.alkuElutasit.onclick = () => alkuElutasitasa(veglegesAjanlat);
-            DOM.dontesiTerulet.classList.add('aktiv');
-            gameState.allapot = 'dontes';
+            DOM.alkuElfogad.onclick = () => alkuElfogadasa(veglegesAjanlat, false); DOM.alkuElutasit.onclick = () => alkuElutasitasa(veglegesAjanlat);
+            DOM.dontesiTerulet.classList.add('aktiv'); gameState.allapot = 'dontes';
         }
-        function bankarCsereAjanlatotTesz() { /* ... (Változatlan) ... */
+        
+        function bankarCsereAjanlatotTesz() {
              const maradekTaskak = Array.from(document.querySelectorAll('.taska:not(.nyitott)'))
                                       .filter(t => !gameState.sajatTaskak.includes(parseInt(t.dataset.taskaId)));
             const kevert = kever([...maradekTaskak], gameDecisionRNG);
@@ -520,69 +477,62 @@
 
             DOM.dontesCim.textContent = "A Bankár KÜLÖNLEGES Ajánlata!";
             DOM.bankarAjanlata.innerHTML = `Odaadom a(z) <strong>${id1}</strong>-es és a(z) <strong>${id2}</strong>-es táska tartalmát a tiédért cserébe!`;
-            DOM.alkuElfogad.textContent = "Elfogadom a cserét!";
-            DOM.alkuElutasit.textContent = "NEM, KÖSZÖNÖM!";
-            DOM.alkuElfogad.onclick = () => csereElfogadasa(id1, id2);
-            DOM.alkuElutasit.onclick = () => alkuElutasitasa(ajanlatSzoveg);
-            DOM.dontesiTerulet.classList.add('aktiv');
-            gameState.allapot = 'dontes';
+            DOM.dontesLeiras.textContent = ""; DOM.alkuVegsoAjanlat.classList.add('rejtett');
+            DOM.alkuElfogad.textContent = "Elfogadom a cserét!"; DOM.alkuElutasit.textContent = "NEM, KÖSZÖNÖM!";
+            DOM.alkuElfogad.onclick = () => csereElfogadasa(id1, id2); DOM.alkuElutasit.onclick = () => alkuElutasitasa(ajanlatSzoveg);
+            DOM.dontesiTerulet.classList.add('aktiv'); gameState.allapot = 'dontes';
         }
-        function updateOfferHistoryUI() { /* ... (Változatlan) ... */
-             if (gameState.offerHistory.length === 0) {
-                DOM.ajanlatTortenet.classList.add('rejtett'); return;
-            }
+        
+        function updateOfferHistoryUI() {
+             if (gameState.offerHistory.length === 0) { DOM.ajanlatTortenet.classList.add('rejtett'); return; }
             DOM.ajanlatTortenet.classList.remove('rejtett');
             DOM.ajanlatLista.innerHTML = gameState.offerHistory.map(h => {
                 let decisionClass = h.decision === 'Elfogadva' ? 'ajanlat-dontes-elfogadva' : 'ajanlat-dontes-elutasitva';
-                if (h.offer.startsWith('Csere')) decisionClass += ' ajanlat-specialis';
+                if (h.offer.startsWith('Csere') || h.offer.startsWith('Tartás')) decisionClass += ' ajanlat-specialis';
                 return `<li><span>${h.round}. kör: ${h.offer}</span> <span class="${decisionClass}">${h.decision}</span></li>`;
             }).join('');
         }
-        function alkuElutasitasa(ajanlat) { /* ... (Változatlan) ... */
+        
+        function alkuElutasitasa(ajanlat) {
              const ajanlatSzoveg = typeof ajanlat === 'number' ? formatValuta(ajanlat) : ajanlat;
-            gameState.offerHistory.push({ round: gameState.aktualisKor + 1, offer: ajanlatSzoveg, decision: 'Elutasítva' });
-            updateOfferHistoryUI();
-            DOM.dontesiTerulet.classList.remove('aktiv');
-            gameState.aktualisKor++;
-            gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
-            gameState.allapot = 'nyitogatas';
-            mutassUzenetet(getRandomElem(uzenetek.alkuElutasitva, gameDecisionRNG), `Akkor nyiss ki ${gameState.megNyitando} táskát!`);
+            gameState.offerHistory.push({ round: gameState.aktualisKor + 1, offer: ajanlatSzoveg, decision: 'Elutasítva' }); updateOfferHistoryUI();
+            DOM.dontesiTerulet.classList.remove('aktiv'); gameState.aktualisKor++; gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
+            gameState.allapot = 'nyitogatas'; mutassUzenetet(getRandomElem(uzenetek.alkuElutasitva, gameDecisionRNG), `Akkor nyiss ki ${gameState.megNyitando} táskát!`);
         }
-        function alkuElfogadasa(ajanlatErtek) { /* ... (Változatlan) ... */
+        
+        function alkuElfogadasa(ajanlatErtek, jatekVege = false) {
             gameState.nyertOsszeg = ajanlatErtek;
-            gameState.offerHistory.push({ round: gameState.aktualisKor + 1, offer: formatValuta(ajanlatErtek), decision: 'Elfogadva' });
-            updateOfferHistoryUI();
-            DOM.dontesiTerulet.classList.remove('aktiv');
+            if (!jatekVege) {
+                gameState.offerHistory.push({ round: gameState.aktualisKor + 1, offer: formatValuta(ajanlatErtek), decision: 'Elfogadva' });
+            }
+            updateOfferHistoryUI(); DOM.dontesiTerulet.classList.remove('aktiv');
             const sajatNyeremeny = gameState.taskaErtekek[gameState.sajatTaskak[0]];
-            mutassUzenetet(`ÁLL AZ ALKU! A garantált nyereményed: ${formatValuta(ajanlatErtek)}!`, `Lássuk, mi lett volna, ha tovább játszol! A te táskádban a(z) "${sajatNyeremeny.display}" volt.`);
-            gameState.allapot = 'alku_elfogadva_kijatszas';
-            gameState.aktualisKor++;
-            gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
-            setTimeout(() => {
-                 mutassUzenetet(`Kezdődik a kijátszás! Nyiss ki ${gameState.megNyitando} táskát!`);
-            }, 4000);
+            mutassUzenetet(`ÁLL AZ ALKU! A garantált nyereményed: ${formatValuta(ajanlatErtek)}!`, `A te táskádban a(z) "${sajatNyeremeny.display}" volt.`);
+            
+            if (jatekVege) {
+                setTimeout(() => finalReveal(null, true), 1000);
+            } else {
+                gameState.allapot = 'alku_elfogadva_kijatszas'; gameState.aktualisKor++;
+                gameState.megNyitando = nyitasiSzamlalo[gameState.aktualisKor] || 1;
+                setTimeout(() => { mutassUzenetet(`Kezdődik a kijátszás! Nyiss ki ${gameState.megNyitando} táskát!`); }, 4000);
+            }
         }
-        function vegeJatek() { /* ... (Változatlan) ... */
+        
+        function vegeJatek() {
             gameState.allapot = 'vege';
              if (getJelenlegiSeed() !== gameState.aktivJatekSeed) {
-                 DOM.keveresSzoveg.classList.add('rejtett');
-                 DOM.frissitesGomb.classList.remove('rejtett');
+                 DOM.keveresSzoveg.classList.add('rejtett'); DOM.frissitesGomb.classList.remove('rejtett');
              }
         }
-        function idoFrissites() { /* ... (Változatlan) ... */
-             const now = new Date();
-            DOM.pontosIdo.textContent = now.toLocaleTimeString('hu-HU');
-            const msPer15Min = 15 * 60 * 1000;
-            const kovetkezoIdopontMs = (Math.floor(now.getTime() / msPer15Min) + 1) * msPer15Min;
+        
+        function idoFrissites() {
+             const now = new Date(); DOM.pontosIdo.textContent = now.toLocaleTimeString('hu-HU');
+            const msPer15Min = 15 * 60 * 1000; const kovetkezoIdopontMs = (Math.floor(now.getTime() / msPer15Min) + 1) * msPer15Min;
             const kovetkezoIdopont = new Date(kovetkezoIdopontMs);
             DOM.idoKovetkezo.textContent = `${String(kovetkezoIdopont.getHours()).padStart(2, '0')}:${String(kovetkezoIdopont.getMinutes()).padStart(2, '0')}`;
             if (getJelenlegiSeed() !== gameState.aktivJatekSeed) {
-                if(gameState.allapot === 'vege' || gameState.allapot === 'kezdes_elott' || gameState.allapot === 'sajat_valasztas') {
-                    init();
-                } else {
-                    DOM.keveresSzoveg.classList.add('rejtett');
-                    DOM.frissitesGomb.classList.remove('rejtett');
-                }
+                if(gameState.allapot === 'vege' || gameState.allapot === 'kezdes_elott' || gameState.allapot === 'sajat_valasztas') { init(); } 
+                else { DOM.keveresSzoveg.classList.add('rejtett'); DOM.frissitesGomb.classList.remove('rejtett'); }
             }
         }
 
