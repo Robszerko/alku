@@ -352,40 +352,48 @@
             'Elhagyott bevásárlólista': "2 liter tej, kenyér... ezt már nem neked kell megvenni!"
         };
 
-        const BANKER_ANGRY_TAUNTS =[
-            "A Bankár most vert szét egy billentyűzetet!",
-            "A Bankár a haját tépi a vezérlőben!",
-            "A Bankár dühében felborította a kávéját!",
-            "Hatalmas káromkodás hallatszott a telefonból...",
-            "A Bankár most zúzta be a monitort!",
-            "A Bankár arcán az erek kidagadtak!",
-            "A vezérlőben most némult el mindenki...",
-            "A Bankár orvosért kiáltott!",
-            "A Bankár most dobta ki a telefont az ablakon!",
-            "A Bankár épp a felmondását írja...",
-            "A Bankár zokogva hívta az anyukáját...",
+        const MOOD_ANGRY_TAUNTS =[
+            "Ezt nem hiszem el! Valaki állítsa már meg!",
+            "Izzad a tenyerem... Túl sok a nagy összeg a táblán!",
+            "Rögtön hívom a biztonságiakat, ez felháborító rablás!",
+            "A Bankár levegőért kapkod a vezérlőben!",
+            "Hogy lehetsz ekkora mázlista?! Ezt a gépek sem értik!",
+            "A Bankár most vágta földhöz a telefonját dühében!",
+            "Kezdem rosszul érezni magam... Ez a játék az állásomba kerül!",
+            "A HR már hívott, hogy levonják a fizetésemből ezt a sok milliót!",
+            "Mindenki feszült a vezérlőben. A Bankár arca vörös a dühtől!",
+            "Ez kész katasztrófa! Túl jól állsz, azonnal add el a táskád!",
             "Egy hangos reccsenés: a Bankár asztala kettétört!",
             "A Bankár most rúgta ki az asszisztensét!",
             "A Bankár toporzékol, mint egy durcás kisgyerek!",
-            "A Bankár hirtelen lefejelte az asztalt!"
+            "A Bankár hirtelen lefejelte a monitort!"
         ];
 
-        const BANKER_HAPPY_TAUNTS =[
-            "A Bankár boldogan dörzsöli a tenyerét!",
-            "A Bankár pezsgőt bontott a vezérlőben!",
-            "A Bankár most rendelt egy luxusjachtot a pénzedből!",
+        const MOOD_SMUG_TAUNTS =[
+            "A Bankár kényelmesen hátradőlt egy kávéval. Nincs mitől tartania.",
+            "Kiválóan játszol... nekem! Szépen hullanak a milliók!",
+            "Dőlj hátra, ez a te formád ma! Semmi esélyed.",
+            "Ma is spóroltam a csatornának egy vagyont! Gratulálok!",
+            "A Bankár most töltött magának egy konyakot az egészségedre!",
+            "Ne is izgulj, a végén adok egy buszjegyet!",
+            "Tökéletes! A kiszemelt jachtom máris a kosárban van!",
+            "A vezérlőben mindenki rajtad nevet. Kínos...",
+            "Azt hiszem, ezt a játékot már megnyertem. De folytasd csak!",
             "A Bankár kárörvendő kacagása zengi be a stúdiót!",
             "A Bankár mosolya a füléig ér!",
-            "A Bankár most kapott bónuszt a főnökétől!",
-            "A Bankár szivarra gyújtott és hátradőlt.",
-            "A vezérlőben most mindenki ünnepel...",
-            "A Bankár küldött egy kacsintós szmájlit a képernyőre.",
-            "A Bankár már tervezi a Maldív-szigeteki útját.",
-            "A Bankár épp most rendelt egy kaviáros pizzát!",
-            "A Bankár hangos örömujjongásba tört ki!",
-            "A Bankár elégedetten csettintett egyet.",
-            "A Bankár most vett egy új sportkocsit a hibádból!",
-            "A Bankár hálás neked ezért a csodás pillanatért!"
+            "A Bankár szivarra gyújtott és csak mosolyog.",
+            "A Bankár elégedetten csettintett egyet."
+        ];
+
+        const BLUFF_TAUNTS =[
+            "Én belelátok a táskákba... Csak szólok, a tiédben egy kacat lapul!",
+            "Blöffölök vagy sem? Lehet, hogy nálad van a fődíj... de lehet, hogy csak 100 forint.",
+            "Szerintem cserélned kéne... a kamerákon látom, hogy üres a táskád!",
+            "Látom a listámat. Az a táska, amit most kihagytál, tele van pénzzel!",
+            "Ha tudnád, mi van a táskádban, azonnal kiszállnál a játékból.",
+            "Tudod mi az érdekes? Végig a szemed előtt volt a fődíj, de nem azt választottad.",
+            "Ne bízz magadban túlságosan. Amit most csinálsz, az a vesztedbe rohanás.",
+            "A Bankár egy sejtelmes mosollyal figyeli a táskád... Vajon miért?"
         ];
 
         const PLAYER_GOOD_TAUNTS =[
@@ -398,12 +406,8 @@
             "Egy lépéssel közelebb a milliókhoz!",
             "A Bankár rémálma válik valóra!",
             "Nagyon érzed ma a táskákat!",
-            "Ezt a Bankár megkönnyezte!",
             "Mesteri választás!",
-            "A szerencse ma melletted áll!",
-            "Pont ezt akartuk látni!",
-            "Briliáns nyitás, a tábla gyönyörű!",
-            "A nagy nyeremény egyre biztosabb!"
+            "A szerencse ma melletted áll!"
         ];
 
         const PLAYER_BAD_TAUNTS =[
@@ -415,13 +419,9 @@
             "Kínos csend a stúdióban...",
             "Ezt a táskát jobb lett volna békén hagyni!",
             "Egy hatalmas összeggel kevesebb...",
-            "A Bankár máris sokkal nyugodtabb!",
             "Súlyos csapás a nyerési esélyeidre!",
             "Ezt fájt nézni...",
-            "A tábla most hatalmasat gyengült!",
-            "Ezt a nyitást gyorsan felejtsük el!",
-            "Mintha pofon vágtak volna...",
-            "Remegnek a lábak, hatalmas buktató!"
+            "A tábla most hatalmasat gyengült!"
         ];
 
         const HAPPY_ENDINGS =[
@@ -525,10 +525,12 @@
 
         function initGame() {
             const nyeremenyek = generatePrizes();
+            const initialAverage = nyeremenyek.reduce((a, b) => a + b.value, 0) / nyeremenyek.length;
+
             gameState = { 
                 allapot: 'sajat_valasztas', sajatTaska: null, taskaErtekek: {}, maradekNyeremenyek:[...nyeremenyek], 
                 aktualisKor: 0, megNyitando: NYITASI_SZAMLALO[0], offerHistory:[], nyertOsszeg: 0, bonuszPenz: 0,
-                marEladta: false, lilaSajat: false, isProcessingClick: false
+                marEladta: false, lilaSajat: false, isProcessingClick: false, initialAverage: initialAverage
             };
             rejtFlipAjanlat(); DOM.ajanlatTortenet.classList.add('rejtett'); DOM.ajanlatLista.innerHTML = ''; 
             mutassUzenetet("Kezdődik a játék!", "Kattints arra a táskára, amit hazavinnél!");
@@ -590,24 +592,23 @@
             await wait(1200); taskaElem.classList.remove('animacio-nyitas'); taskaElem.classList.add('nyitott'); 
             document.querySelector(`li[data-uid='${nyeremeny.uId}']`).classList.replace('aktiv', 'kiesett');
             
-            const atlagErtek = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
             gameState.maradekNyeremenyek = gameState.maradekNyeremenyek.filter(n => n.uId !== nyeremeny.uId);
             
-            let bekiabalas = SPECIFIC_TAUNTS[nyeremeny.display] || ""; 
+            const newAtlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
+            const boardHealth = newAtlag / gameState.initialAverage;
+            
+            let isLargeOut = (nyeremeny.value >= 1000000 || nyeremeny.value > newAtlag * 1.5);
             let főUzenet = "";
-            let isLargeOut = (nyeremeny.value >= 1000000 || nyeremeny.value > atlagErtek * 2);
+            let bekiabalas = "";
 
+            // 1. Játékos üzenete (A nyitott táskára reagál)
             if (isLargeOut) { 
                 if (nyeremeny.type === 'penz') {
                     főUzenet = getRandomElem(PLAYER_BAD_TAUNTS);
                 } else if (nyeremeny.type === 'targy') {
                     főUzenet = getRandomElem(["Oda a luxus!", "Ezt a tárgyat már nem viszed haza!", "Elszállt az álom!", "Marad a busz és a gyaloglás!"]);
                 }
-                if (!bekiabalas) bekiabalas = getRandomElem(BANKER_HAPPY_TAUNTS);
-                if (nyeremeny.value >= 25000000) { 
-                    főUzenet = "Tragédia!"; 
-                    if(!SPECIFIC_TAUNTS[nyeremeny.display]) bekiabalas = "A Bankár pezsgőt bontott!"; 
-                }
+                if (nyeremeny.value >= 25000000) főUzenet = "Tragédia!"; 
             } else { 
                 if (nyeremeny.type === 'penz') {
                     főUzenet = getRandomElem(PLAYER_GOOD_TAUNTS);
@@ -616,14 +617,37 @@
                 } else if (nyeremeny.type === 'vicc') {
                     főUzenet = getRandomElem(["Egy kacattal kevesebb!", "Szuper, a lomtalanítás sikeres volt!", "Megúsztad ezt a poént!"]);
                 }
-                if (!bekiabalas) bekiabalas = getRandomElem(BANKER_ANGRY_TAUNTS);
-                if (nyeremeny.type === 'vicc' && !SPECIFIC_TAUNTS[nyeremeny.display]) bekiabalas = "Szuper! A kacat a múlté."; 
+            }
+
+            // 2. Bankár üzenete (Kibővített intelligencia)
+            const specificTaunt = SPECIFIC_TAUNTS[nyeremeny.display];
+            const rand = Math.random();
+
+            if (specificTaunt && rand < 0.4) {
+                bekiabalas = specificTaunt;
+            } else if (rand < 0.60) { 
+                // 20% esély blöffre vagy elmejátékra
+                bekiabalas = getRandomElem(BLUFF_TAUNTS);
+            } else {
+                // Tábla egészsége szerinti hangulat
+                if (boardHealth > 1.2) {
+                    // Játékos nagyon jól áll -> Bankár dühös/pánikol
+                    bekiabalas = getRandomElem(MOOD_ANGRY_TAUNTS);
+                    if (isLargeOut) bekiabalas = "Huh... Végre! A Bankár egy picit fellélegzett a nagy kieső láttán.";
+                } else if (boardHealth < 0.8) {
+                    // Játékos rosszul áll -> Bankár kényelmes/arrogáns
+                    bekiabalas = getRandomElem(MOOD_SMUG_TAUNTS);
+                    if (!isLargeOut) bekiabalas = "Na végre egy jó hír neked is... de a táblád attól még borzalmas!";
+                } else {
+                    // Semleges tábla, a konkrét eseményre reagál
+                    bekiabalas = isLargeOut ? getRandomElem(MOOD_SMUG_TAUNTS) : getRandomElem(MOOD_ANGRY_TAUNTS);
+                }
             }
 
             mutassUzenetet(főUzenet, `${nyeremeny.display} volt benne.`, bekiabalas);
             await wait(2500);
 
-            // Lila bónusz 3 millióig
+            // Lila Bónusz 3 millióig
             if (taskaElem.classList.contains('rejtelyes') && !gameState.lilaSajat) {
                 mutassUzenetet("LILA LÁTNOK BÓNUSZ!", "Megláthatod a jövőt (max 3 millióig)!", "", true); await wait(2500);
                 const zartElemek = Array.from(document.querySelectorAll('.taska:not(.nyitott)')).filter(t => t.dataset.taskaId != gameState.sajatTaska);
@@ -635,11 +659,24 @@
                 }
             }
 
-            // Soron Kívüli Kísértés (ha nagy összeg esik ki, és nem a kör utolsó nyitása)
-            if (isLargeOut && Math.random() < 0.30 && gameState.megNyitando > 1 && !gameState.marEladta) {
+            // SORON KÍVÜLI KÍSÉRTÉS LOGIKA
+            let triggerSoronKivuli = false;
+            let soronKivuliTipus = "";
+
+            if (gameState.megNyitando > 1 && !gameState.marEladta) {
+                if (isLargeOut && Math.random() < 0.25) {
+                    triggerSoronKivuli = true;
+                    soronKivuliTipus = (boardHealth < 0.8) ? "cinikus" : "vicces";
+                } else if (!isLargeOut && boardHealth > 1.3 && Math.random() < 0.20) {
+                    triggerSoronKivuli = true;
+                    soronKivuliTipus = "rendkivuli";
+                }
+            }
+
+            if (triggerSoronKivuli) {
                 await wait(1000);
-                bankarSoronKivuli(nyeremeny);
-                return; // Normal flow stops here, SoronKivuli handles continuation
+                bankarSoronKivuli(nyeremeny, soronKivuliTipus);
+                return; 
             }
 
             folytatNyitasUtan();
@@ -650,8 +687,7 @@
             if (gameState.megNyitando > 0) { 
                 frissitNyitasiSzoveg(); 
                 gameState.isProcessingClick = false; 
-            } 
-            else { 
+            } else { 
                 await kiertekelKorVege(); 
             }
         }
@@ -661,42 +697,41 @@
             mutassUzenetet(`${prefix}Még ${gameState.megNyitando} táskát nyiss ki.`, `Saját táskád: ${gameState.sajatTaska}`);
         }
 
-        async function bankarSoronKivuli(kiesoNyeremeny) {
+        async function bankarSoronKivuli(kiesoNyeremeny, tipus) {
             mutassUzenetet("A BANKÁR KÖZBESZÓL!", "Megcsörrent a telefon soron kívül!", "", true);
             await wait(3500);
 
-            const r = Math.random();
             let alapAjanlat = calculateBankerOffer();
             
-            if (r < 0.33) { // Cinikus
+            if (tipus === "cinikus") {
                 let cinikusAjanlat = Math.round((alapAjanlat * (Math.random() * 0.05 + 0.01)) / 100) * 100;
                 if (cinikusAjanlat < 100) cinikusAjanlat = 100;
                 
-                let leiras = `Látom, kiment a(z) <b>${kiesoNyeremeny.display}</b>! A Bankár jót nevet, és adna egy kis aprót vigaszdíjnak...<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`;
+                let leiras = `Látom, kiment a(z) <b>${kiesoNyeremeny.display}</b>! A Bankár jót nevet rajtad, és felajánl egy kis aprót vigaszdíjnak buszjegyre...<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`;
                 
                 mutassFlipAjanlat("CINIKUS AJÁNLAT", formatValuta(cinikusAjanlat), leiras,[
                     { szoveg: "Ezt komolyan gondolja?! Elfogadom...", osztaly: "btn-elfogad", akcio: () => elfogadSoronKivuli(cinikusAjanlat, "Cinikus Bankár") },
                     { szoveg: "Kinevetem és megyek tovább!", osztaly: "btn-elutasit", akcio: () => elutasitSoronKivuli(cinikusAjanlat, "Cinikus Bankár") }
                 ]);
-            } else if (r < 0.66) { // Vicces
+            } else if (tipus === "vicces") {
                 let viccesTargy = getRandomElem(MASTER_PRIZES.vicc).display;
-                let leiras = `Kiment a(z) <b>${kiesoNyeremeny.display}</b>! A Bankár kárörvendve felajánlja ezt a "nagyszerű" nyereményt!<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, a játék véget ér!)</span>`;
+                let leiras = `Kiment a(z) <b>${kiesoNyeremeny.display}</b>! A Bankár kárörvendve felajánlja neked ezt a "nagyszerű" ajándékot!<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, a játék véget ér!)</span>`;
                 
                 mutassFlipAjanlat("VIGASZDÍJ?", viccesTargy, leiras,[
                     { szoveg: "Jobb, mint a semmi...", osztaly: "btn-elfogad", akcio: () => elfogadSoronKivuli(viccesTargy, "Vigaszdíj") },
                     { szoveg: "Nem kérem a szemetét!", osztaly: "btn-elutasit", akcio: () => elutasitSoronKivuli(viccesTargy, "Vigaszdíj") }
                 ]);
-            } else { // Rendkívüli
+            } else if (tipus === "rendkivuli") {
                 let premiumAjanlat = Math.round((alapAjanlat * (Math.random() * 0.4 + 1.2)) / 1000) * 1000;
                 let maxVal = Math.max(...gameState.maradekNyeremenyek.map(n => n.value));
                 if (premiumAjanlat >= maxVal) premiumAjanlat = Math.round(maxVal * 0.85 / 1000) * 1000;
                 if (premiumAjanlat < 1000) premiumAjanlat = 1000;
                 
-                let leiras = `Kiment a(z) <b>${kiesoNyeremeny.display}</b>! A Bankár vérszemet kapott, és AZONNAL le akarja zárni a játékot egy zsíros ajánlattal!<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`;
+                let leiras = `A Bankár bepánikolt, mert túl jól állsz! AZONNAL le akarja zárni a játékot egy rendkívüli ajánlattal!<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`;
                 
-                mutassFlipAjanlat("RENDKÍVÜLI AJÁNLAT", formatValuta(premiumAjanlat), leiras,[
-                    { szoveg: "Megveszem!", osztaly: "btn-elfogad", akcio: () => elfogadSoronKivuli(premiumAjanlat, "Rendkívüli Bankár") },
-                    { szoveg: "Nem adom fel!", osztaly: "btn-elutasit", akcio: () => elutasitSoronKivuli(premiumAjanlat, "Rendkívüli Bankár") }
+                mutassFlipAjanlat("PÁNIK AJÁNLAT!", formatValuta(premiumAjanlat), leiras,[
+                    { szoveg: "Megveszem!", osztaly: "btn-elfogad", akcio: () => elfogadSoronKivuli(premiumAjanlat, "Pánikoló Bankár") },
+                    { szoveg: "Nem adom fel!", osztaly: "btn-elutasit", akcio: () => elutasitSoronKivuli(premiumAjanlat, "Pánikoló Bankár") }
                 ]);
             }
         }
@@ -735,7 +770,20 @@
             }
             if (maradekZartSzam === 2) { finalShowdown(); return; }
 
-            mutassUzenetet("Csendet kérek! Csörög a telefon...", "Figyeld az ajánlatot...", "", true); await wait(3500);
+            const atlagErtek = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
+            const boardHealth = atlagErtek / gameState.initialAverage;
+
+            let phoneSub = "Figyeld az ajánlatot...";
+            if (boardHealth > 1.2) {
+                phoneSub = "A Bankár remegő hangon hívott... Nagyon szabadulna tőled!";
+            } else if (boardHealth < 0.8) {
+                phoneSub = "A Bankár röhögve hívott... Lássuk, mit kínál a gombokért!";
+            } else {
+                phoneSub = "A Bankár hív... Vajon mit talált ki most?";
+            }
+
+            mutassUzenetet("Csendet kérek! Csörög a telefon...", phoneSub, "", true); await wait(3500);
+            
             const ajanlatErtek = calculateBankerOffer();
             
             if (gameState.marEladta) {
