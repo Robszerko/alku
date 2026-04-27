@@ -26,7 +26,7 @@
             box-shadow: inset 0 0 200px rgba(0,0,0,0.95);
         }
 
-        .container { max-width: 1600px; margin: 0 auto; width: 100%; flex-grow: 1; display: flex; flex-direction: column; }
+        .container { max-width: 1600px; margin: 0 auto; width: 100%; flex-grow: 1; display: flex; flex-direction: column; position: relative;}
         
         header { display: flex; flex-direction: column; align-items: center; padding-bottom: 10px; margin-bottom: 15px; position: relative; }
 
@@ -48,7 +48,6 @@
             letter-spacing: 0; border-left: 5px solid #000; border-right: 5px solid #000;
         }
 
-        /* Gombok pozicionálása - asztalin jobb felül mindkettő egymás mellett */
         .header-buttons { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 100; }
 
         #uj-jatek-gomb {
@@ -73,9 +72,9 @@
         .copyright-info { font-family: 'Orbitron', sans-serif; font-size: 0.95rem; color: rgba(255, 255, 255, 0.6); text-shadow: 2px 2px 4px #000; text-align: center;}
 
         /* Játéktér grid alapú asztali nézetben, mobilon oszlopos flex */
-        .jatekterulet { display: flex; flex-direction: column; width: 100%; flex-grow: 1; }
+        .jatekterulet { display: flex; flex-direction: column; width: 100%; flex-grow: 1; z-index: 2; position: relative;}
         
-        /* Pénzfa konténerek pozicionálása - mobilon egymás mellett fent */
+        /* Pénzfa konténerek pozicionálása */
         .penzfa-wrapper { display: flex; justify-content: space-between; width: 100%; gap: 4px; margin-bottom: 15px; }
         .penzfa-kontener { list-style: none; padding: 0; margin: 0; width: 49%; display: flex; flex-direction: column; gap: 4px; }
         .penzfa-elem { 
@@ -86,9 +85,23 @@
         }
         .penzfa-elem .tipus-icon { opacity: 0.8; font-size: 1.1em; flex-shrink: 0; }
         
-        .penzfa-elem.aktiv { background: linear-gradient(90deg, #b48600 0%, #ffd700 100%); color: #000; }
-        .penzfa-elem.aktiv.jobb-oldal { background: linear-gradient(90deg, #ffd700 0%, #b48600 100%); }
-        .penzfa-elem.kiesett { background: #1a1a1a; color: #444; text-decoration: line-through; opacity: 0.6; border-color: #000; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
+        /* Színkódolt nyeremény oszlopok */
+        .prize-tier-joke.aktiv { background: linear-gradient(90deg, #1e293b 0%, #334155 100%); color: #cbd5e1; }
+        .prize-tier-joke.aktiv.jobb-oldal { background: linear-gradient(90deg, #334155 0%, #1e293b 100%); }
+
+        .prize-tier-small.aktiv { background: linear-gradient(90deg, #78350f 0%, #b45309 100%); color: #fef3c7; }
+        .prize-tier-small.aktiv.jobb-oldal { background: linear-gradient(90deg, #b45309 0%, #78350f 100%); }
+
+        .prize-tier-medium.aktiv { background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); color: #eff6ff; }
+        .prize-tier-medium.aktiv.jobb-oldal { background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%); }
+
+        .prize-tier-large.aktiv { background: linear-gradient(90deg, #b48600 0%, #ffd700 100%); color: #000; }
+        .prize-tier-large.aktiv.jobb-oldal { background: linear-gradient(90deg, #ffd700 0%, #b48600 100%); }
+
+        .prize-tier-huge.aktiv { background: linear-gradient(90deg, #064e3b 0%, #10b981 100%); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); text-shadow: 1px 1px 2px #000;}
+        .prize-tier-huge.aktiv.jobb-oldal { background: linear-gradient(90deg, #10b981 0%, #064e3b 100%); }
+
+        .penzfa-elem.kiesett { background: #1a1a1a !important; color: #444 !important; text-decoration: line-through; opacity: 0.6; border-color: #000; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); text-shadow: none;}
 
         #fő-kontener { display: flex; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; position: relative; max-width: 100%; overflow: hidden;}
         
@@ -111,7 +124,6 @@
             border: 2px solid rgba(212, 175, 55, 0.5); 
         }
         
-        /* A hátsórész görgethető, hogy sose lógjon le a szöveg */
         .info-back { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 15px 10px;
             background: linear-gradient(145deg, #3a0000, #150000, #3a0000); 
@@ -228,6 +240,11 @@
         .ajanlat-dontes-elfogadva { color: var(--offer-accept); font-weight: bold; }
         .ajanlat-lista-elfogadva-sor { border-left-color: var(--offer-accept) !important; background: rgba(16, 185, 129, 0.15) !important;}
 
+        /* Konfetti Tűzijáték Effekt */
+        #fireworks-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
+        .confetti { position: absolute; width: 10px; height: 10px; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
         @media (min-width: 1024px) {
             .jatekterulet { display: grid; grid-template-columns: 280px 1fr 280px; gap: 30px; align-items: flex-start; }
             .penzfa-wrapper { display: contents; }
@@ -240,22 +257,45 @@
             #taska-racs { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; }
             .taska-szam { width: 55px; height: 55px; font-size: 2rem; }
         }
+        
+        /* ULTRA KOMPAKT MOBIL NÉZET, HOGY MINDEN KIFÉRJEN 1 KÉPERNYŐRE */
         @media (max-width: 768px) {
-            header { padding-top: 50px; }
-            /* Gombok szétválasztása mobilon két oldalra */
+            body { padding: 4px; }
+            header { padding-top: 35px; margin-bottom: 5px; }
+            
+            .logo-container { transform: scale(0.7); margin-bottom: 0; }
+            
             .header-buttons { position: static; display: contents; }
-            #powerup-gomb { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; padding: 8px 12px; }
-            #uj-jatek-gomb { position: absolute; top: 10px; right: 10px; font-size: 0.7rem; padding: 8px 12px; }
+            #powerup-gomb { position: absolute; top: 5px; left: 5px; font-size: 0.65rem; padding: 6px 10px; }
+            #uj-jatek-gomb { position: absolute; top: 5px; right: 5px; font-size: 0.65rem; padding: 6px 10px; }
+            
+            /* Pénzfa összenyomása */
+            .penzfa-wrapper { margin-bottom: 5px; }
+            .penzfa-elem { padding: 2px 4px; font-size: 0.55rem; border-width: 0.5px; }
+            
+            /* Üzenőfal összenyomása */
+            #info-flipper { min-height: 130px; } 
+            .info-front { padding: 5px; }
+            #informacios-sav-kontener { margin-bottom: 5px; }
+            #uzenetek { font-size: 1rem; }
+            #kiegeszito-uzenet { font-size: 0.75rem; margin-top: 2px; }
+            #bekiabalas { font-size: 0.7rem; margin-top: 2px; line-height: 1.1; }
+            
+            /* Táskarács: Fix 6 oszlop, 4 sorba rendezve a 24 táskát */
+            #taska-racs { 
+                grid-template-columns: repeat(6, 1fr); 
+                gap: 4px; 
+                padding: 2px; 
+            }
+            .taska-szam { width: 28px; height: 28px; font-size: 1rem; border-width: 2px; }
+            
+            /* Bankári kártya hátulja összenyomva */
+            #back-cim { font-size: 0.85rem; }
+            #back-osszeg { font-size: 1.3rem; margin: 2px 0; }
+            #back-leiras { font-size: 0.65rem; margin-bottom: 4px; }
+            .back-gomb { padding: 5px 8px; font-size: 0.6rem; }
             
             #ajanlat-lista { grid-template-columns: 1fr; }
-            
-            #info-flipper { min-height: 220px; } 
-            .info-front { padding: 10px; justify-content: center; }
-            #uzenetek { font-size: 1.2rem; }
-            #kiegeszito-uzenet { font-size: 0.9rem; margin-top: 4px; }
-            #bekiabalas { font-size: 0.85rem; line-height: 1.2; margin-top: 4px; }
-            #taska-racs { gap: 8px; padding: 5px; }
-            .taska-szam { width: 40px; height: 40px; font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -342,11 +382,18 @@
                 { display: 'Fél pár zokni', value: 3, type: 'vicc'}, { display: 'Lejárt kuponkód', value: 0, type: 'vicc'},
                 { display: 'Eltört vonalzó', value: 4, type: 'vicc'}, { display: 'Kavics a cipődből', value: 1, type: 'vicc'},
                 { display: 'Műanyag alma', value: 5, type: 'vicc'}, { display: 'Üres befőttesüveg', value: 10, type: 'vicc'},
-                { display: 'Törött napszemüveg', value: 20, type: 'vicc'}, { display: 'Elhagyott bevásárlólista', value: 0, type: 'vicc'}
+                { display: 'Törött napszemüveg', value: 20, type: 'vicc'}, { display: 'Elhagyott bevásárlólista', value: 0, type: 'vicc'},
+                { display: 'Eltört fogpiszkáló', value: 0, type: 'vicc' }, { display: 'Kilyukadt teafilter', value: 1, type: 'vicc' },
+                { display: 'Használt rágópapír', value: 0, type: 'vicc' }, { display: 'Fél pár fülbevaló', value: 2, type: 'vicc' },
+                { display: 'Szakadt cipőfűző', value: 1, type: 'vicc' }, { display: 'Egy marék por', value: 0, type: 'vicc' },
+                { display: 'Lejárt sorsjegy', value: 0, type: 'vicc' }, { display: 'Lyukas vödör', value: 5, type: 'vicc' },
+                { display: 'Rozsdás biciklicsengő', value: 10, type: 'vicc' }, { display: 'Lemerült gombelem', value: 1, type: 'vicc' },
+                { display: 'Száraz falevél', value: 0, type: 'vicc' }, { display: 'Műanyag kavics', value: 2, type: 'vicc' },
+                { display: 'Penészes kenyérvég', value: 0, type: 'vicc' }, { display: 'Elfogyott ragasztószalag', value: 1, type: 'vicc' },
+                { display: 'Szakadt lepkeháló', value: 5, type: 'vicc' }
             ]
         };
 
-        // KÜLÖNLEGES KACATOK, AMIK CSAK SORON KÍVÜLI (VIGASZDÍJ) HÍVÁSNÁL JELENNEK MEG
         const BANKER_SURPRISE_JOKES = [
             "Használt buszjegy", "Kilyukadt esernyő", "Egy üveg csapvíz", "Fél csomag rágó", 
             "Lejárt kondibérlet", "Három szem szotyi", "Törött fogpiszkáló", "Két hetes falevél", 
@@ -412,7 +459,10 @@
             'Műanyag alma': "Hófehérke is visszautasította volna. Szép munka!",
             'Üres befőttesüveg': "A nagyi lekvárja nélkül semmit sem ér. Szuper nyitás!",
             'Törött napszemüveg': "A fél szemedre úgyis vakító lett volna a nap.",
-            'Elhagyott bevásárlólista': "2 liter tej, kenyér... ezt már nem neked kell megvenni!"
+            'Elhagyott bevásárlólista': "2 liter tej, kenyér... ezt már nem neked kell megvenni!",
+            'Penészes kenyérvég': "Fúj! Ezt még a madarak se ették volna meg.",
+            'Lejárt sorsjegy': "Már csak a papírgyűjtésnél érsz el vele sikert!",
+            'Egy marék por': "A takarítónő hálás, hogy kinyitottad!"
         };
 
         const BANKER_NEUTRAL_GOOD_TAUNTS = [
@@ -477,6 +527,25 @@
             "Ne bízz magadban túlságosan. Amit most csinálsz, az a vesztedbe rohanás."
         ];
 
+        const EPIC_WIN_MESSAGES = [
+            "TÖRTÉNELMI GYŐZELEM! A stúdió felrobban, a Bankár zokog!",
+            "ELKÉPESZTŐ! A legendák közé emelkedtél ezzel a játékkal!",
+            "ZSENIÁLIS! Erre évek múlva is emlékezni fog mindenki!",
+            "MILLIOMOS LETTÉL! A Bankár épp most nyújtotta be a felmondását!",
+            "FANTASZTIKUS! A lehetetlent is megcsináltad ma este!",
+            "GIGÁSZI NYEREMÉNY! Ideje kinyitni a legdrágább pezsgőt!",
+            "MEGÁLL AZ ÉSZ! Ezt még a gép is nehezen hiszi el!",
+            "HIHETETLEN! Új csillag született a játék történetében!",
+            "KÁPRÁZATOS DÖNTÉSEK! Te vagy az alku vitathatatlan mestere!",
+            "EBBEN A PILLANATBAN TÖRTÉNELMET ÍRTÁL!",
+            "CSODA TÖRTÉNT! A szerencse és a tudás tökéletes kombinációja!",
+            "A BANKÁR ÖSSZEOMLOTT! Ekkora bukást még sohasem élt át!",
+            "MINDEN ELISMERÉS A TIÉD! Egy teljesen hibátlan játékot hoztál le!",
+            "ÓRIÁSI KASZÁLÁS! Szó szerint kifosztottad a Bankárt!",
+            "FENSÉGES GYŐZELEM! Ma este te vagy az úr a házban!",
+            "BRUTÁLIS SIKER! Erre egyszerűen nincsenek is megfelelő szavak!"
+        ];
+
         const HAPPY_ENDINGS =[
             "Irány a Maldív-szigetek, a főnöködnek meg küldj egy képeslapot! :)",
             "A NAV már dörzsöli a tenyerét, de addig is ünnepelj! Zseniális játék!",
@@ -534,6 +603,37 @@
         function getRandomElem(tomb) { return tomb[Math.floor(Math.random() * tomb.length)]; }
         function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
+        // Tűzijáték indítása (Megnövelt darabszám és időtartam, 10+ mp-ig hullik)
+        function startCelebration() {
+            const container = document.createElement('div');
+            container.id = 'fireworks-container';
+            document.querySelector('.container').appendChild(container);
+            const colors = ['#f8b500', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#fff'];
+            
+            for (let i = 0; i < 300; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = -10 - Math.random() * 20 + 'vh';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                conf.style.animationDuration = (Math.random() * 4 + 4) + 's'; 
+                conf.style.animationDelay = (Math.random() * 7) + 's'; 
+                
+                if (Math.random() > 0.5) conf.style.borderRadius = '50%';
+                container.appendChild(conf);
+            }
+            setTimeout(() => { if(container.parentNode) container.remove(); }, 16000);
+        }
+
+        function getTierClass(value) {
+            if (value < 1000) return 'prize-tier-joke';
+            if (value < 100000) return 'prize-tier-small';
+            if (value < 1000000) return 'prize-tier-medium';
+            if (value < 10000000) return 'prize-tier-large';
+            return 'prize-tier-huge';
+        }
+
         function mutassUzenetet(fő, kiegeszito = "", bekiabalas = "", isPhoneCall = false) {
             DOM.uzenetekSzoveg.innerHTML = fő; 
             
@@ -580,6 +680,9 @@
         }
 
         function initGame() {
+            const existingFireworks = document.getElementById('fireworks-container');
+            if(existingFireworks) existingFireworks.remove();
+
             const nyeremenyek = generatePrizes();
             const initialAverage = nyeremenyek.reduce((a, b) => a + b.value, 0) / nyeremenyek.length;
 
@@ -596,8 +699,10 @@
             
             mutassUzenetet("Kezdődik a játék!", "Kattints arra a táskára, amit hazavinnél!");
             const getIcon = (ny) => ny.type === 'targy' ? '🎁' : (ny.type === 'vicc' ? '🤡' : '💰');
-            DOM.penzfaBal.innerHTML = nyeremenyek.slice(0, 12).map(ny => `<li data-uid="${ny.uId}" class="penzfa-elem aktiv bal-oldal"><span class="tipus-icon">${getIcon(ny)}</span> <span class="prize-text">${ny.display}</span></li>`).join('');
-            DOM.penzfaJobb.innerHTML = nyeremenyek.slice(12).map(ny => `<li data-uid="${ny.uId}" class="penzfa-elem aktiv jobb-oldal"><span class="prize-text">${ny.display}</span> <span class="tipus-icon">${getIcon(ny)}</span></li>`).join('');
+            
+            DOM.penzfaBal.innerHTML = nyeremenyek.slice(0, 12).map(ny => `<li data-uid="${ny.uId}" class="penzfa-elem aktiv bal-oldal ${getTierClass(ny.value)}"><span class="tipus-icon">${getIcon(ny)}</span> <span class="prize-text">${ny.display}</span></li>`).join('');
+            DOM.penzfaJobb.innerHTML = nyeremenyek.slice(12).map(ny => `<li data-uid="${ny.uId}" class="penzfa-elem aktiv jobb-oldal ${getTierClass(ny.value)}"><span class="prize-text">${ny.display}</span> <span class="tipus-icon">${getIcon(ny)}</span></li>`).join('');
+            
             DOM.taskaRacs.innerHTML = ''; const kevertNyeremenyek = kever([...nyeremenyek]); const rejtelyesId = Math.floor(Math.random() * TOTAL_CASES) + 1;
             
             for (let i = 1; i <= TOTAL_CASES; i++) {
@@ -608,7 +713,6 @@
             }
         }
 
-        // Röntgen Gomb Logika
         DOM.powerupGomb.addEventListener('click', () => {
             if (gameState.hasznaltRontgen || gameState.rontgenLejart || gameState.allapot === 'sajat_valasztas' || gameState.allapot === 'vegsokattintas') {
                 return;
@@ -621,7 +725,6 @@
             
             mutassUzenetet("RÖNTGEN SZEMÜVEG AKTÍV!", "Kattints egy zárt táskára, hogy 2 másodpercre meglásd mi van benne!", "De vigyázz, a táska utána VISSZAZÁRUL és bent marad a játékban!");
             
-            // Kiemeljük a lehetséges célpontokat
             document.querySelectorAll('.taska:not(.nyitott):not(.sajat-taskam)').forEach(t => t.classList.add('rontgen-celpont'));
         });
 
@@ -629,7 +732,6 @@
             if (gameState.isProcessingClick) return;
             const taskaElem = document.querySelector(`.taska[data-taska-id='${id}']`);
             
-            // A végső táskára kattintást még azelőtt ellenőrizzük, hogy a 'sajat-taskam' miatt kilépne!
             if (gameState.allapot === 'vegsokattintas') {
                 if (id == gameState.sajatTaska) { gameState.isProcessingClick = true; await kinyitVegsoTaska(id); } 
                 else { mutassUzenetet("Kattints a SAJÁT táskádra!", "Már csak ez az egy maradt hátra."); }
@@ -640,7 +742,6 @@
 
             gameState.isProcessingClick = true;
 
-            // Ha Röntgen aktív
             if (gameState.isRontgenAktiv) {
                 document.querySelectorAll('.taska').forEach(t => t.classList.remove('rontgen-celpont'));
                 gameState.isRontgenAktiv = false;
@@ -701,7 +802,6 @@
             let bekiabalas = "";
 
             if (!gameState.marEladta) {
-                // --- JÁTÉKBAN VAGYUNK MÉG ---
                 if (isLargeOut) {
                     gameState.badStreak++; gameState.goodStreak = 0;
                     if (nyeremeny.value >= 10000000) gameState.elvesztettNagyok.push(nyeremeny.display);
@@ -711,7 +811,6 @@
                     főUzenet = "Szuper!"; if (nyeremeny.type === 'vicc') főUzenet = "Szemét a kukában!";
                 }
 
-                // Intelligens Szövegelés (Még játékban)
                 const specificTaunt = SPECIFIC_TAUNTS[nyeremeny.display];
                 
                 if (gameState.badStreak >= 3) {
@@ -736,8 +835,6 @@
                     }
                 }
             } else {
-                // --- KIJÁTSZÁS (Már eladta a táskát) ---
-                // Itt a pszichológia megfordul! Ha nagy esik ki, az jó a játékosnak (mert nem nála volt). Ha kicsi, az rossz.
                 if (isLargeOut) {
                     főUzenet = getRandomElem(["Megkönnyebbülés!", "Huh, ez meleg volt!", "Szerencse, hogy már eladtad!", "Ezt megúsztad!"]);
                     bekiabalas = getRandomElem([
@@ -762,7 +859,6 @@
             mutassUzenetet(főUzenet, `${nyeremeny.display} volt benne.`, bekiabalas);
             await wait(2500);
 
-            // Lila Bónusz 3 millióig
             if (taskaElem.classList.contains('rejtelyes') && !gameState.lilaSajat) {
                 mutassUzenetet("LILA LÁTNOK BÓNUSZ!", "Megláthatod a jövőt (max 3 millióig)!", "", true); await wait(2500);
                 const zartElemek = Array.from(document.querySelectorAll('.taska:not(.nyitott)')).filter(t => t.dataset.taskaId != gameState.sajatTaska);
@@ -774,7 +870,6 @@
                 }
             }
 
-            // SORON KÍVÜLI KÍSÉRTÉS LOGIKA
             let triggerSoronKivuli = false;
             let soronKivuliTipus = "";
 
@@ -829,7 +924,7 @@
                     { szoveg: "Kinevetem és megyek tovább!", osztaly: "btn-elutasit", akcio: () => elutasitSoronKivuli(cinikusAjanlat, "Cinikus Bankár") }
                 ]);
             } else if (tipus === "vicces") {
-                let viccesTargy = getRandomElem(BANKER_SURPRISE_JOKES); // Speciális vicces lista használata!
+                let viccesTargy = getRandomElem(BANKER_SURPRISE_JOKES);
                 let leiras = `Kiment a(z) <b>${kiesoNyeremeny.display}</b>! A Bankár kárörvendve felajánlja neked ezt a "nagyszerű" vigaszdíjat!<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, a játék véget ér!)</span>`;
                 
                 mutassFlipAjanlat("VIGASZDÍJ?", viccesTargy, leiras,[
@@ -911,7 +1006,6 @@
             const twistEsely = Math.random(); let valasztottTwist = null;
             if (twistEsely < 0.65) { 
                 const availableTwists =[];
-                // Dupláztam a súgó esélyeit a korai körökben
                 if (gameState.aktualisKor <= 4) availableTwists.push('sugo', 'sugo');
                 if (gameState.aktualisKor >= 2 && gameState.aktualisKor <= 5) availableTwists.push('kombo', 'ot_koteg', 'felezo_duplazo', 'vak_csere_penzzel', 'szerencsekerek', 'szabad_csere');
                 if (gameState.aktualisKor >= 3 && gameState.aktualisKor <= 6) availableTwists.push('vak_alku', 'rulett', 'harom_doboz', 'targy_csomag', 'szabad_csere');
@@ -958,7 +1052,6 @@
 
         async function bankarSugo() {
             const zartElemek = Array.from(document.querySelectorAll('.taska:not(.nyitott)')).filter(t => t.dataset.taskaId != gameState.sajatTaska);
-            // 100.000 Ft alattiak vagy vicc tárgyak mutatása
             const kisTaskak = zartElemek.filter(t => gameState.taskaErtekek[t.dataset.taskaId].value <= 100000 || gameState.taskaErtekek[t.dataset.taskaId].type === 'vicc');
             if (kisTaskak.length > 0) {
                 const id = getRandomElem(kisTaskak).dataset.taskaId;
@@ -1260,9 +1353,9 @@
                 return;
             } 
             
-            mutassFlipAjanlat("AZ UTOLSÓ DÖNTÉS", formatValuta(vegsoAjanlat), `Itt a vége. Kéred a pénzt, VAGY cserélsz a(z) ${masikId}. táskára?`,[
+            // CSERE GOMB ELTÁVOLÍTVA a kiskapu bezárása miatt!
+            mutassFlipAjanlat("AZ UTOLSÓ DÖNTÉS", formatValuta(vegsoAjanlat), `Itt a vége. Kéred a bankár utolsó ajánlatát, VAGY kinyitod a sajátodat (${gameState.sajatTaska}.)?`,[
                 { szoveg: `Sajátomat (${gameState.sajatTaska})!`, osztaly: "btn-elutasit", akcio: () => befejezesKezelese(null, 'Tartás', gameState.sajatTaska) },
-                { szoveg: `Csere (${masikId})!`, osztaly: "btn-vegso", akcio: () => befejezesKezelese(null, 'Csere', masikId) },
                 { szoveg: "Pénzt kérem!", osztaly: "btn-elfogad", akcio: () => befejezesKezelese(vegsoAjanlat, 'Pénz', gameState.sajatTaska) }
             ]);
         }
@@ -1273,11 +1366,7 @@
             if (elfogadottPenz) {
                 gameState.nyertOsszeg = elfogadottPenz; gameState.marEladta = true;
                 mutassUzenetet(`ELFOGADTAD A PÉNZT! Nyereményed: ${formatValuta(elfogadottPenz)}!`, "A játék utolsó lépése... nyisd ki a másikat!");
-            } else if (tipus === 'Csere') {
-                document.querySelector(`.taska[data-taska-id='${gameState.sajatTaska}']`).classList.remove('sajat-taskam');
-                gameState.sajatTaska = vegsoTaskaId; document.querySelector(`.taska[data-taska-id='${vegsoTaskaId}']`).classList.add('sajat-taskam');
-                mutassUzenetet("CSERÉLTÉL!", `Most nyisd ki a régit, hogy tudd mit adtál oda!`);
-            } else { mutassUzenetet("NEM CSERÉLTÉL!", `Bátor döntés! Nyisd ki az idegent!`); }
+            } else { mutassUzenetet("SAJÁT TÁSKA!", `Bátor döntés! Nyisd ki az utolsó idegen táskát!`); }
 
             gameState.allapot = 'nyitogatas'; gameState.megNyitando = 1; gameState.isProcessingClick = false;
         }
@@ -1312,7 +1401,18 @@
             } else { choiceEval = "Megmentetted a saját táskád a végéig!"; }
 
             let isBigWin = totalValue >= 1000000;
-            let endMessage = isBigWin ? getRandomElem(HAPPY_ENDINGS) : getRandomElem(SAD_ENDINGS);
+            let isEpicWin = totalValue >= 5000000; 
+            
+            let endMessage = "";
+            
+            if (isEpicWin) {
+                endMessage = getRandomElem(EPIC_WIN_MESSAGES);
+                startCelebration(); 
+            } else if (isBigWin) {
+                endMessage = getRandomElem(HAPPY_ENDINGS);
+            } else {
+                endMessage = getRandomElem(SAD_ENDINGS);
+            }
             
             let ctaHtml = `<br><br><span class="play-again-pulse" onclick="document.getElementById('uj-jatek-gomb').click()">Nincs még vége! Kattints ide, és toljunk le egy újabb kört! 😉</span>`;
 
