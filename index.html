@@ -471,7 +471,6 @@
             return { year: d.getUTCFullYear(), week: weekNo };
         }
 
-        // Visszaadja a formázott hetet (pl. 2024-W05). Az offset-el lehet az előző heteket kérni.
         function getWeekString(offset = 0) {
             let d = new Date();
             d.setDate(d.getDate() - (offset * 7));
@@ -485,7 +484,6 @@
             const prevWeekId = getWeekString(1);
             
             try {
-                // 1. ELŐZŐ HETI BAJNOK LEKÉRDEZÉSE (Aranyéremhez)
                 const qPrev = query(collection(db, "leaderboard"), where("week", "==", prevWeekId));
                 const prevSnap = await getDocs(qPrev);
                 let prevPlayers = [];
@@ -493,16 +491,13 @@
                 prevPlayers.sort((a, b) => (b.money || 0) - (a.money || 0));
                 const reigningChamp = prevPlayers.length > 0 ? prevPlayers[0].name : null;
 
-                // 2. JELENLEGI HETI JÁTÉKOSOK LEKÉRDEZÉSE
                 const qCurr = query(collection(db, "leaderboard"), where("week", "==", currentWeekId));
                 const currSnap = await getDocs(qCurr);
                 
                 let players = [];
                 currSnap.forEach((doc) => players.push(doc.data()));
-                
-                // Rendezzük csökkenő sorrendbe megnyert pénz szerint
                 players.sort((a, b) => (b.money || 0) - (a.money || 0));
-                players = players.slice(0, 5); // Top 5
+                players = players.slice(0, 5); 
 
                 let html = "";
                 players.forEach((data, index) => {
@@ -512,7 +507,6 @@
                     let formatMoney = new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(data.money || 0);
                     
                     let nameDisplay = data.name;
-                    // Ha ő volt az előző heti bajnok, megkapja az aranyérmet a neve mellé
                     if(data.name === reigningChamp) nameDisplay = `🥇 ${nameDisplay}`;
 
                     html += `<li class="${rankClass}"><span><b>${displayRank}</b> ${nameDisplay}</span> <span>${formatMoney}</span></li>`;
@@ -526,9 +520,9 @@
             }
         }
 
-        // MENTJÜK A PÉNZT A RANGLISTÁBA
+        // MENTJÜK A PÉNZT A RANGLISTÁBA (Most már Offline Solo módban is működik, ha van Firebase!)
         async function awardWinMoney(amount) {
-            if(isSpectator || !db || !currentPlayerName || !isOnlineMode || amount <= 0) return; 
+            if(isSpectator || !db || !currentPlayerName || amount <= 0) return; 
             const weekId = getWeekString(0);
             const docId = `${currentPlayerName}_${weekId}`; 
             const playerRef = doc(db, "leaderboard", docId);
@@ -541,14 +535,12 @@
 
         function generateRoomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
-        // SZOBA TÖRLÉSE FUNKCIÓ (Host számára)
         async function cleanupRoom() {
             if (isOnlineMode && !isSpectator && currentRoomCode && db) {
                 try { await deleteDoc(doc(db, "rooms", currentRoomCode)); } catch(e) {}
             }
         }
         
-        // Csatoljuk globálisan is, hogy a belső HTML-ből hívható legyen
         window.cleanupRoom = cleanupRoom;
 
         window.addEventListener('beforeunload', async () => {
@@ -567,7 +559,6 @@
             isSpectator = false;
             isOnlineMode = false;
             
-            // Játékállapot alapértelmezett beállítása offline módban is!
             gameState = { taskaErtekek: {} }; 
 
             DOM_LOBBY.nameDisplay.textContent = name;
@@ -604,7 +595,6 @@
                     gameState: {} 
                 });
 
-                // Figyeljük saját szobánkat a nézők miatt!
                 onSnapshot(doc(db, "rooms", currentRoomCode), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
@@ -630,7 +620,7 @@
                 if(roomSnap.exists()) {
                     isSpectator = true;
                     isOnlineMode = true;
-                    gameState = { taskaErtekek: {} }; // Alapállapot betöltése, hogy ne fagyjon ki
+                    gameState = { taskaErtekek: {} }; 
 
                     currentRoomCode = code;
                     const joinName = DOM_LOBBY.nameInput.value.trim() || "Néző_" + Math.floor(Math.random()*1000);
@@ -640,7 +630,6 @@
                     DOM_LOBBY.screen.style.display = "none";
                     DOM_LOBBY.game.style.display = "flex";
                     
-                    // Nézői tiltások
                     document.getElementById('taska-racs').style.pointerEvents = 'none';
                     document.getElementById('info-flipper').style.pointerEvents = 'none';
                     document.querySelectorAll('.header-btn').forEach(btn => { btn.style.pointerEvents = 'none'; });
@@ -649,32 +638,25 @@
                     DOM_LOBBY.viewerDisplay.style.display = "inline-block";
                     DOM_LOBBY.roomSpan.textContent = "NÉZED: " + code;
 
-                    // Alap betöltés szöveg
                     DOM.uzenetekSzoveg.innerHTML = "Várakozás a Játékmesterre...";
 
-                    // Szobához adás
                     await updateDoc(roomRef, { viewers: arrayUnion(currentPlayerName) });
 
-                    // Pálya betöltése ha a Host már legenerálta
                     const data = roomSnap.data();
                     if(data.boardLayout && data.casesLayout) {
                         renderBoard(data.boardLayout, data.casesLayout, data.rejtelyesId);
                     }
 
-                    // Valós idejű figyelés
                     onSnapshot(roomRef, (docSnap) => {
                         if(!docSnap.exists()) { alert("A Host befejezte a játékot vagy kilépett."); window.location.reload(); return; }
                         const docData = docSnap.data();
                         
-                        // Nézőszám frissítés
                         if(docData.viewers) DOM_LOBBY.viewerCountSpan.textContent = docData.viewers.length;
 
-                        // Ha közben generálódott le a pálya
                         if(docData.boardLayout && document.querySelectorAll('.taska').length === 0) {
                             renderBoard(docData.boardLayout, docData.casesLayout, docData.rejtelyesId);
                         }
 
-                        // Játékállapot szinkronizálása
                         if(docData.gameState) renderSpectatorState(docData.gameState);
                     });
                 } else { alert("A szoba nem található vagy már lejárt!"); }
@@ -728,7 +710,16 @@
                 { display: 'Rozsdás biciklicsengő', value: 10, type: 'vicc' }, { display: 'Lemerült gombelem', value: 1, type: 'vicc' },
                 { display: 'Száraz falevél', value: 0, type: 'vicc' }, { display: 'Műanyag kavics', value: 2, type: 'vicc' },
                 { display: 'Penészes kenyérvég', value: 0, type: 'vicc' }, { display: 'Elfogyott ragasztószalag', value: 1, type: 'vicc' },
-                { display: 'Szakadt lepkeháló', value: 5, type: 'vicc' }
+                { display: 'Szakadt lepkeháló', value: 5, type: 'vicc' },
+                // 15 Új vicces tárgy hozzáadva:
+                { display: 'Fából vaskarika', value: 0, type: 'vicc' }, { display: 'Üres sörösüveg', value: 10, type: 'vicc' },
+                { display: 'Törött fésű', value: 2, type: 'vicc' }, { display: 'Kiszáradt nedves törlőkendő', value: 1, type: 'vicc' },
+                { display: 'Konzervnyitó nyitó nélkül', value: 5, type: 'vicc' }, { display: 'Műanyag jégkocka', value: 1, type: 'vicc' },
+                { display: 'Használt fogkefe', value: 0, type: 'vicc' }, { display: 'Félig rágott ceruza', value: 2, type: 'vicc' },
+                { display: 'Lukas szatyorka', value: 1, type: 'vicc' }, { display: 'Használt macskaalom', value: 0, type: 'vicc' },
+                { display: 'Lejárt BKV jegy', value: 3, type: 'vicc' }, { display: 'Egy marék szotyi', value: 5, type: 'vicc' },
+                { display: 'Műhó', value: 10, type: 'vicc' }, { display: 'Rozsdás lakat kulcs nélkül', value: 4, type: 'vicc' },
+                { display: 'Fél pár síléc', value: 100, type: 'vicc' }
             ]
         };
 
@@ -797,7 +788,12 @@
             'Műanyag alma': "Hófehérke is visszautasította volna. Szép munka!",
             'Üres befőttesüveg': "A nagyi lekvárja nélkül semmit sem ér. Szuper nyitás!",
             'Törött napszemüveg': "A fél szemedre úgyis vakító lett volna a nap.",
-            'Elhagyott bevásárlólista': "2 liter tej, kenyér... ezt már nem neked kell megvenni!"
+            'Elhagyott bevásárlólista': "2 liter tej, kenyér... ezt már nem neked kell megvenni!",
+            'Fából vaskarika': "Ennek annyi értelme van, mint a bankár nagylelkűségének!",
+            'Használt fogkefe': "Fúj! Még a Bankár is elfordította a fejét a monitorról!",
+            'Fél pár síléc': "Ezzel legfeljebb csak körbe-körbe tudsz csúszni. Remek nyitás!",
+            'Használt macskaalom': "A stúdió takarítója is hálás, hogy ez kiment!",
+            'Lejárt BKV jegy': "Azzal már biztos nem bliccelsz haza!"
         };
 
         const BANKER_NEUTRAL_GOOD_TAUNTS = [
@@ -955,7 +951,6 @@
                         panik: { text: DOM.panikGomb.innerHTML, disabled: DOM.panikGomb.disabled },
                         pajzs: { text: DOM.pajzsGomb.innerHTML, disabled: DOM.pajzsGomb.disabled }
                     },
-                    // Táskák pontos osztályai a 100%-os realtime animációért
                     caseStates: Array.from(document.querySelectorAll('.taska')).map(el => ({
                         id: el.dataset.taskaId,
                         isOpen: el.classList.contains('nyitott'),
@@ -975,7 +970,6 @@
 
         // Nézői állapot megjelenítése az extra infókkal
         function renderSpectatorState(data) {
-            // Táskák szinkronja teljes pontossággal
             if (data.caseStates) {
                 data.caseStates.forEach(cs => {
                     const el = document.querySelector(`.taska[data-taska-id='${cs.id}']`);
@@ -1127,9 +1121,7 @@
             return selected.map((p, index) => ({ ...p, uId: index + 1 })).sort((a, b) => a.value - b.value);
         }
 
-        // Pálya kirajzolása (Host és Néző számára közös)
         function renderBoard(nyeremenyek, kevertNyeremenyek, rejtelyesId) {
-            // Biztosítjuk hogy a gameState rendben legyen
             if (!gameState) gameState = {};
             if (!gameState.taskaErtekek) gameState.taskaErtekek = {};
 
@@ -1153,6 +1145,17 @@
             }
         }
 
+        // --- PAJZS GOMB FRISSÍTÉSE ---
+        function frissitPajzsGomb() {
+            if (gameState.shieldCount > 0) {
+                DOM.pajzsGomb.disabled = false;
+                DOM.pajzsGomb.innerHTML = `🛡️ Pajzs (x${gameState.shieldCount})`;
+            } else {
+                DOM.pajzsGomb.disabled = true;
+                DOM.pajzsGomb.innerHTML = "🛡️ Használva";
+            }
+        }
+
         function initGame() {
             const existingFireworks = document.getElementById('fireworks-container');
             if(existingFireworks) existingFireworks.remove();
@@ -1171,7 +1174,7 @@
                 badStreak: 0, goodStreak: 0, elvesztettNagyok: [], 
                 hasznaltRontgen: false, isRontgenAktiv: false, rontgenLejart: false,
                 hasznaltPanikgomb: false, hasznaltVisszaajanlas: false,
-                hasznaltPajzs: false, isPajzsAktiv: false, 
+                shieldCount: 1, isPajzsAktiv: false, shieldCaseId: Math.floor(Math.random() * TOTAL_CASES) + 1,
                 kihivasBuntetes: false, kihivasEredetiAjanlat: 0
             };
             
@@ -1180,14 +1183,13 @@
             
             DOM.powerupGomb.disabled = false; DOM.powerupGomb.innerHTML = "👁️ Röntgen";
             DOM.panikGomb.disabled = true; DOM.panikGomb.innerHTML = "🚨 Pánik";
-            DOM.pajzsGomb.disabled = true; DOM.pajzsGomb.innerHTML = "🛡️ Pajzs";
+            
+            frissitPajzsGomb();
             
             mutassUzenetet("Kezdődik a játék!", "Kattints arra a táskára, amit hazavinnél!");
             
-            // Pálya rajzolása
             renderBoard(nyeremenyek, kevertNyeremenyek, rejtelyesId);
 
-            // Ha Host vagyunk, elküldjük a generált pályát az adatbázisba a nézőknek
             if(isOnlineMode && !isSpectator) {
                 updateDoc(doc(db, "rooms", currentRoomCode), {
                     boardLayout: nyeremenyek,
@@ -1215,10 +1217,13 @@
             syncGameState();
         });
 
+        // --- MÓDOSÍTOTT PAJZS KATTINTÁS ---
         DOM.pajzsGomb.addEventListener('click', () => {
-            if (gameState.hasznaltPajzs || gameState.allapot !== 'nyitogatas' || gameState.isProcessingClick) return;
-            if (gameState.isRontgenAktiv) return;
-            gameState.isPajzsAktiv = true; DOM.pajzsGomb.disabled = true; DOM.pajzsGomb.innerHTML = "🛡️ Használva";
+            if (gameState.shieldCount <= 0 || gameState.allapot !== 'nyitogatas' || gameState.isProcessingClick) return;
+            if (gameState.isRontgenAktiv || gameState.isPajzsAktiv) return;
+            gameState.isPajzsAktiv = true; 
+            gameState.shieldCount--; 
+            frissitPajzsGomb();
             mutassUzenetet("VÉDŐPAJZS AKTIVÁLVA!", "A következő kinyitott táskád védve van!", "Ha a nyeremény 1 Millió vagy afeletti, a táska VISSZAZÁRUL!");
             document.querySelectorAll('.taska:not(.nyitott):not(.sajat-taskam)').forEach(t => t.classList.add('pajzs-celpont'));
             syncGameState();
@@ -1247,7 +1252,7 @@
                 document.querySelectorAll('.taska').forEach(t => t.classList.remove('rontgen-celpont'));
                 gameState.isRontgenAktiv = false; gameState.hasznaltRontgen = true;
                 taskaElem.classList.add('animacio-rontgen'); 
-                syncGameState(); // Animáció szinkron
+                syncGameState();
                 mutassUzenetet("👁️ Röntgen bekapcsolva...", "Lássuk mi lapul bent!");
                 await wait(2500); taskaElem.classList.remove('animacio-rontgen');
                 mutassUzenetet("Röntgen kikapcsolva!", "Az infót megjegyezted. Jöhet a folytatás!", "A táska visszazárult."); await wait(2000);
@@ -1256,7 +1261,7 @@
 
             if (gameState.isPajzsAktiv) {
                 document.querySelectorAll('.taska').forEach(t => t.classList.remove('pajzs-celpont'));
-                gameState.isPajzsAktiv = false; gameState.hasznaltPajzs = true;
+                gameState.isPajzsAktiv = false;
                 const nyeremeny = gameState.taskaErtekek[id];
                 if (nyeremeny.value >= 1000000) {
                     mutassUzenetet("🛡️ A PAJZS MEGNYÍLT ÉS FELFOGTA A CSAPÁST!", `A(z) ${id}. táskában óriási összeg (${nyeremeny.display}) volt!`, "A táska visszazárult, az összeg bent marad! Válassz másikat!");
@@ -1278,7 +1283,7 @@
 
             if (gameState.allapot === 'sajat_valasztas') {
                 gameState.sajatTaska = id; taskaElem.classList.add('sajat-taskam'); 
-                DOM.panikGomb.disabled = false; DOM.pajzsGomb.disabled = false;
+                DOM.panikGomb.disabled = false; frissitPajzsGomb();
                 
                 const valasztottSzoveg = `A(z) ${id}. táska a tiéd!`;
                 if (taskaElem.classList.contains('rejtelyes')) {
@@ -1304,6 +1309,14 @@
             await wait(1200); taskaElem.classList.remove('animacio-nyitas'); taskaElem.classList.add('nyitott');
             document.querySelector(`li[data-uid='${nyeremeny.uId}']`).classList.replace('aktiv', 'kiesett');
             syncGameState();
+            
+            // Rejtett Pajzs csekkolás
+            if (id == gameState.shieldCaseId) {
+                gameState.shieldCount++;
+                frissitPajzsGomb();
+                mutassUzenetet("🛡️ TITKOS PAJZS!", "Megtaláltad az elrejtett extra Pajzsot a táskában!", "+1 Védőpajzs hozzáadva!", true);
+                await wait(2500);
+            }
 
             gameState.maradekNyeremenyek = gameState.maradekNyeremenyek.filter(n => n.uId !== nyeremeny.uId);
             const newAtlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
@@ -1332,12 +1345,20 @@
             const nyeremeny = gameState.taskaErtekek[id];
 
             taskaElem.classList.add('animacio-nyitas'); 
-            syncGameState(); // Küldjük el az animáció kezdetét
+            syncGameState();
             mutassUzenetet("Feszültség...", "Nyílik a táska...");
             await wait(1200); 
             taskaElem.classList.remove('animacio-nyitas'); taskaElem.classList.add('nyitott'); 
             document.querySelector(`li[data-uid='${nyeremeny.uId}']`).classList.replace('aktiv', 'kiesett');
-            syncGameState(); // Küldjük el a nyitott állapotot
+            syncGameState(); 
+
+            // Rejtett Pajzs csekkolása!
+            if (id == gameState.shieldCaseId) {
+                gameState.shieldCount++;
+                frissitPajzsGomb();
+                mutassUzenetet("🛡️ TITKOS PAJZS!", "Megtaláltad az elrejtett extra Pajzsot a táskában!", "+1 Védőpajzs hozzáadva!", true);
+                await wait(2500);
+            }
             
             gameState.maradekNyeremenyek = gameState.maradekNyeremenyek.filter(n => n.uId !== nyeremeny.uId);
             
@@ -1491,13 +1512,19 @@
             
             let ajanlatErtek = calculateBankerOffer();
 
+            // FELGYORSÍTOTT KIJÁTSZÁS:
             if (gameState.marEladta) {
-                let text = "Ezt az összeget ajánlotta volna most a Bankár.";
-                mutassFlipAjanlat("MI LETT VOLNA HA...", formatValuta(ajanlatErtek), text,[
-                    { szoveg: "Tovább a kijátszáshoz", osztaly: "btn-vegso", akcio: () => { 
-                        mutassUzenetet("Kijátszás folytatódik...", "Lássuk mi maradt!"); rejtFlipAjanlat(); setTimeout(kovetkezoKor, 400); 
-                    }}
-                ]); return;
+                let text = "Ezt az összeget ajánlotta volna most a Bankár.<br><span style='color: #10b981; font-size: 0.95rem; font-weight: bold; margin-top: 10px; display: block;'>Automatikus folytatás a következő körre...</span>";
+                mutassFlipAjanlat("MI LETT VOLNA HA...", formatValuta(ajanlatErtek), text, []);
+                
+                // Automatikusan továbbmegy 3 másodperc után
+                setTimeout(() => {
+                    mutassUzenetet("Kijátszás folytatódik...", "Lássuk mi maradt!");
+                    rejtFlipAjanlat(); 
+                    setTimeout(kovetkezoKor, 400);
+                }, 3000);
+                
+                return;
             }
 
             if (isPanicMode) { bankarAjanlatotTesz(ajanlatErtek, null, true); return; }
@@ -1961,13 +1988,16 @@
             const ertek2 = gameState.taskaErtekek[masikId].value;
             const vegsoAjanlat = Math.round(((ertek1 + ertek2) / 2 * 0.95) / 1000) * 1000;
 
+            // FELGYORSÍTOTT VÉGSŐ KIJÁTSZÁS:
             if (gameState.marEladta) {
-                mutassFlipAjanlat("MI LETT VOLNA HA...", formatValuta(vegsoAjanlat), `A Bankár utolsó ajánlata ez lett volna. Már csak a sajátod (${gameState.sajatTaska}) és a(z) ${masikId}. maradt.`,[
-                    { szoveg: "Utolsó táska kinyitása!", osztaly: "btn-vegso", akcio: () => {
-                        mutassUzenetet("Kijátszás utolsó lépése!", `Kérlek, nyisd ki az idegen táskát (${masikId}.)!`);
-                        rejtFlipAjanlat(); gameState.allapot = 'alku_elfogadva_kijatszas'; gameState.megNyitando = 1; gameState.isProcessingClick = false;
-                    }}
-                ]); return;
+                mutassFlipAjanlat("UTOLSÓ BANKÁRI AJÁNLAT", formatValuta(vegsoAjanlat), `A Bankár utolsó ajánlata ez lett volna. Már csak a sajátod (${gameState.sajatTaska}) és a(z) ${masikId}. maradt.<br><span style='color: #10b981; font-size: 0.95rem; font-weight: bold; margin-top: 10px; display: block;'>Automatikus folytatás az utolsó nyitáshoz...</span>`, []);
+                
+                setTimeout(() => {
+                    mutassUzenetet("Kijátszás utolsó lépése!", `Kérlek, nyisd ki az idegen táskát (${masikId}.)!`);
+                    rejtFlipAjanlat(); 
+                    gameState.allapot = 'alku_elfogadva_kijatszas'; gameState.megNyitando = 1; gameState.isProcessingClick = false;
+                }, 3000);
+                return;
             } 
             
             if (Math.random() < 0.40) {
@@ -2026,7 +2056,6 @@
             let isNumeric = typeof baseWinnings === 'number';
             let currentTotal = (isNumeric ? baseWinnings : 0) + gameState.bonuszPenz;
 
-            // Újítás: Fekete táska csak ha az eddigi nyeremény >= 1.000.000
             if (currentTotal >= 1000000) {
                 await wait(2000);
                 mutassUzenetet("VÁRJ CSAK...", "Mi ez itt?", "A stúdió elsötétül...", true); document.body.classList.add('bg-losing'); document.body.classList.remove('bg-winning');
@@ -2082,8 +2111,8 @@
             else if (isBigWin) { endMessage = getRandomElem(HAPPY_ENDINGS); } 
             else { endMessage = getRandomElem(SAD_ENDINGS); }
 
-            // Mentés az Adatbázisba (Pénz alapján)
-            if (isNumeric && finalTotal > 0 && isOnlineMode && !isSpectator) {
+            // Mentés az Adatbázisba (Pénz alapján - most már isOnlineMode nélkül is lefut!)
+            if (isNumeric && finalTotal > 0 && !isSpectator && db) {
                 awardWinMoney(finalTotal);
                 endMessage += `<br><b style="color:#10b981;">(+ ${formatValuta(finalTotal)} a Heti Bajnokságban!)</b>`;
             }
@@ -2093,7 +2122,6 @@
             mutassUzenetet(finalString, `${choiceEval} ${endMessage} ${ctaHtml}`);
             gameState.isProcessingClick = true; 
 
-            // Dinamikus gomb esemény rögzítés, mivel a string-es onclick az async miatt nem működött
             setTimeout(() => {
                 const btn = document.getElementById('final-lobby-btn');
                 if(btn) {
