@@ -74,13 +74,16 @@
         body.bg-winning { background-color: #4a3500; box-shadow: inset 0 0 250px rgba(212, 175, 55, 0.6); }
         body.bg-losing { background-color: #2b0000; box-shadow: inset 0 0 300px rgba(255, 0, 0, 0.8); }
         
-        /* BLACKOUT STYLES */
+        /* BLACKOUT STYLES - IGAZI SÖTÉTSÉG! */
         body.bg-blackout { background-color: #000 !important; background-image: none; box-shadow: none !important; }
         body.bg-blackout .penzfa-wrapper { opacity: 0.05; filter: blur(10px); pointer-events: none; transition: all 1s; }
         body.bg-blackout #taska-racs .taska { filter: brightness(0.3); }
         body.bg-blackout #taska-racs .taska:hover { filter: brightness(1); }
         body.bg-blackout .taska.nyitott .taska-hatlap .taska-osszeg { display: none; }
         body.bg-blackout .taska.nyitott .taska-hatlap::after { content: "???"; color: #ef4444; font-size: 2.5rem; font-weight: 900; position: absolute; text-shadow: 0 0 10px red; animation: pulse-red 1s infinite alternate; }
+        /* Számok eltüntetése és kérdőjelek a sötétben */
+        body.bg-blackout #taska-racs .taska:not(.nyitott) .taska-szam { color: transparent; text-shadow: none; }
+        body.bg-blackout #taska-racs .taska:not(.nyitott) .taska-szam::after { content: "?"; color: #ef4444; position: absolute; font-size: 1.5rem; text-shadow: 0 0 10px red; animation: pulse-red 1s infinite alternate; }
 
         .container { max-width: 1600px; margin: 0 auto; width: 100%; flex-grow: 1; display: flex; flex-direction: column; position: relative;}
         
@@ -1123,9 +1126,8 @@
                 mutassUzenetet("CÉLPONTOK MEGTALÁLVA!", "A 3 sárga táska egyike biztosan a bent lévő LEGNAGYOBB nyereményt rejti!");
                 syncGameState(); 
                 
-                await wait(4000); // Késleltetés a megjegyzéshez
+                await wait(4000);
 
-                // Célpontok eltüntetése
                 targets.forEach(t => t.classList.remove('radar-celpont'));
                 DOM.uzenetekKonteer.classList.remove('telefon-hivas-aktiv');
                 mutassUzenetet("RADAR KIKAPCSOLVA!", "Remélem megjegyezted őket! Folytasd a nyitást.");
@@ -1152,7 +1154,7 @@
             if (gameState.hasznaltRontgen || gameState.rontgenLejart || gameState.allapot === 'sajat_valasztas' || gameState.allapot === 'vegsokattintas') return;
             if (gameState.isProcessingClick || gameState.isPajzsAktiv) return; 
             gameState.isRontgenAktiv = true; DOM.powerupGomb.disabled = true; DOM.powerupGomb.innerHTML = "👁️ Használva";
-            mutassUzenetet("RÖNTGEN SZEMÜVEG AKTÍV!", "Kattints egy zárt táskára, hogy 2 másodpercre meglásd mi van benne!", "De vigyázz, a táska utána VISSZAZÁRUL!");
+            mutassUzenetet("RÖNTGEN SZEMÜVEG AKTÍV!", "Kattints egy zárt táskára, hogy meglásd mi van benne!", "De vigyázz, a táska utána VISSZAZÁRUL!");
             document.querySelectorAll('.taska:not(.nyitott):not(.sajat-taskam)').forEach(t => t.classList.add('rontgen-celpont')); syncGameState();
         });
 
@@ -1179,6 +1181,8 @@
             if (gameState.allapot === 'kihivas_nyitas') { await kinyitKihivasTaska(id); return; }
 
             gameState.isProcessingClick = true;
+
+            taskaElem.classList.remove('radar-celpont');
 
             if (gameState.isRontgenAktiv) {
                 document.querySelectorAll('.taska').forEach(t => t.classList.remove('rontgen-celpont'));
@@ -1479,12 +1483,19 @@
 
             if (isPanicMode) { bankarAjanlatotTesz(ajanlatErtek, null, true); return; }
 
-            const twistEsely = Math.random(); let valasztottTwist = null;
-            if (twistEsely < 0.75) { 
-                const availableTwists =['idozitett_bomba', 'kihivas', 'orosz_rulett', 'zsarolas', 'rejtett_bonusz', 'shell_game'];
-                if (gameState.aktualisKor <= 4) availableTwists.push('sugo', 'sugo', 'blackout');
-                if (gameState.aktualisKor >= 2 && gameState.aktualisKor <= 5) availableTwists.push('kombo', 'ot_koteg', 'felezo_duplazo', 'vak_csere_penzzel', 'szerencsekerek', 'szabad_csere', 'idozitett_bomba', 'kihivas', 'zsarolas', 'blackout');
-                if (gameState.aktualisKor >= 3 && gameState.aktualisKor <= 6) availableTwists.push('vak_alku', 'rulett', 'harom_doboz', 'targy_csomag', 'szabad_csere', 'idozitett_bomba', 'orosz_rulett', 'rejtett_bonusz', 'shell_game', 'hostage', 'shuffle');
+            let valasztottTwist = null;
+            
+            // ÚJ LOGIKA: A végjátékban sokkal agresszívebb a Bankár! (4, 5, 6 körökben)
+            if (!gameState.marEladta && gameState.aktualisKor >= 4 && Math.random() < 0.6) {
+                // 60% esély egy szemétláda húzásra a vége felé!
+                const brutalTwists = ['shuffle', 'shuffle', 'blackout', 'zsarolas', 'hostage'];
+                valasztottTwist = getRandomElem(brutalTwists);
+            } else if (Math.random() < 0.65) { 
+                // Hagyományos, enyhébb twistek a korábbi körökben
+                const availableTwists = ['idozitett_bomba', 'kihivas', 'orosz_rulett', 'rejtett_bonusz', 'shell_game'];
+                if (gameState.aktualisKor <= 4) availableTwists.push('sugo', 'sugo');
+                if (gameState.aktualisKor >= 2) availableTwists.push('kombo', 'felezo_duplazo', 'vak_csere_penzzel', 'szerencsekerek', 'szabad_csere', 'zsarolas');
+                if (gameState.aktualisKor >= 3) availableTwists.push('vak_alku', 'rulett', 'harom_doboz', 'targy_csomag', 'shuffle', 'blackout', 'hostage');
                 if (availableTwists.length > 0) valasztottTwist = getRandomElem(availableTwists);
             }
 
@@ -1495,7 +1506,6 @@
                 case 'idozitett_bomba': bankarIdozitettBomba(ajanlatErtek); break;
                 case 'kihivas': bankarKihivasa(ajanlatErtek); break;
                 case 'orosz_rulett': bankarOroszRulett(ajanlatErtek); break;
-                case 'ot_koteg': bankarOtKotegAjanlat(ajanlatErtek); break;
                 case 'rulett': bankarRulettAjanlat(ajanlatErtek); break;
                 case 'vak_alku': bankarVakAlkuTesz(ajanlatErtek * 1.4); break;
                 case 'felezo_duplazo': bankarFelezoDuplazo(ajanlatErtek); break;
@@ -1540,15 +1550,30 @@
         }
 
         function bankarBlackout(alapAjanlat) {
-            let leiras = `A Bankár zseniális alkut ajánl, de fenyegetőzik: <br><span style='color:#fca5a5; font-weight:bold;'>Ha elutasítod, lekapcsolja a villanyt, és a következő táskákat a SÖTÉTBEN kell kinyitnod! Nem fogod tudni, mik estek ki!</span>`;
+            let leiras = `A Bankár zseniális alkut ajánl, de fenyegetőzik: <br><span style='color:#fca5a5; font-weight:bold;'>Ha elutasítod, lekapcsolja a villanyt, összekeveri a táskákat, és a következő nyitásokat a SÖTÉTBEN kell megtenned!</span>`;
             mutassFlipAjanlat("FENYEGETÉS: ÁRAMSZÜNET!", formatValuta(alapAjanlat), leiras, [
                 { szoveg: "Megveszem, nincs sötét!", osztaly: "btn-elfogad", akcio: () => { rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad', null, "Megúsztad a sötétet"); }},
                 { szoveg: "Nem érdekel, lekapcsolhatod!", osztaly: "btn-elutasit", akcio: async () => {
                     rejtFlipAjanlat(); rogzitAjanlat(formatValuta(alapAjanlat), 'Elutasítva (Áramszünet jön)');
                     mutassUzenetet("A BANKÁR BEVÁLTOTTA ÍGÉRETÉT!", "Áramszünet a stúdióban...", "", true); await wait(2000);
                     
-                    document.body.classList.add('bg-blackout'); gameState.isBlackout = true; syncGameState();
-                    mutassUzenetet("VAKREPÜLÉS!", "Csak a kör végén fogod megtudni, miket nyitottál ki!"); await wait(2500);
+                    document.querySelectorAll('.taska').forEach(t => t.classList.remove('radar-celpont', 'pajzs-celpont', 'rontgen-celpont', 'tusz-celpont'));
+                    
+                    document.body.classList.add('bg-blackout'); gameState.isBlackout = true; 
+                    
+                    // --- TRÜKKÖS KEVERÉS A SÖTÉTBEN ---
+                    const closedCases = Array.from(document.querySelectorAll('.taska:not(.nyitott)'));
+                    const closedIds = closedCases.map(t => t.dataset.taskaId);
+                    const values = closedIds.map(id => gameState.taskaErtekek[id]);
+                    const shuffledValues = kever(values);
+                    
+                    closedIds.forEach((id, index) => {
+                        gameState.taskaErtekek[id] = shuffledValues[index];
+                        document.querySelector(`.taska[data-taska-id='${id}'] .taska-osszeg`).innerHTML = shuffledValues[index].display;
+                    });
+                    
+                    syncGameState();
+                    mutassUzenetet("VAKREPÜLÉS!", "A gép csendben összekeverte a táskákat! Csak a kör végén fogod megtudni, miket nyitottál ki!"); await wait(2500);
                     kovetkezoKor();
                 }}
             ]);
@@ -1619,6 +1644,8 @@
                     rejtFlipAjanlat(); rogzitAjanlat(formatValuta(alapAjanlat), 'Elutasítva (Keverés következik)');
                     gameState.isProcessingClick = true;
                     mutassUzenetet("A BANKÁR DÜHÖNG!", "Teljes káosz a stúdióban! A táskák tartalma összekeveredik!", "", true); await wait(2500);
+                    
+                    document.querySelectorAll('.taska').forEach(t => t.classList.remove('radar-celpont', 'pajzs-celpont', 'rontgen-celpont', 'tusz-celpont'));
                     
                     const closedCases = Array.from(document.querySelectorAll('.taska:not(.nyitott)'));
                     closedCases.forEach(c => c.classList.add('animacio-keveres')); syncGameState();
