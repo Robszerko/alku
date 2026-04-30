@@ -87,7 +87,7 @@
 
         .container { max-width: 1600px; margin: 0 auto; width: 100%; flex-grow: 1; display: flex; flex-direction: column; position: relative;}
         
-        /* TÖKÉLETESÍTETT FEJLÉC (Nincs több egymásba lógás) */
+        /* TÖKÉLETESÍTETT FEJLÉC */
         header { 
             display: flex; flex-direction: column; align-items: center; width: 100%; 
             padding-bottom: 10px; margin-bottom: 15px; position: relative; z-index: 10; 
@@ -473,7 +473,7 @@
 
         let currentPlayerName = "";
         let currentRoomCode = "";
-        let isSpectator = false;
+        window.isSpectator = false;
         let isOnlineMode = false;
 
         const DOM_LOBBY = {
@@ -516,7 +516,7 @@
             try {
                 const qPrev = query(collection(db, "leaderboard"), where("week", "==", prevWeekId));
                 const prevSnap = await getDocs(qPrev);
-                let prevPlayers = [];
+                let prevPlayers =[];
                 prevSnap.forEach(doc => prevPlayers.push(doc.data()));
                 prevPlayers.sort((a, b) => (b.money || 0) - (a.money || 0));
                 const reigningChamp = prevPlayers.length > 0 ? prevPlayers[0].name : null;
@@ -524,7 +524,7 @@
                 const qCurr = query(collection(db, "leaderboard"), where("week", "==", currentWeekId));
                 const currSnap = await getDocs(qCurr);
                 
-                let players = [];
+                let players =[];
                 currSnap.forEach((doc) => players.push(doc.data()));
                 players.sort((a, b) => (b.money || 0) - (a.money || 0));
                 players = players.slice(0, 5); 
@@ -551,7 +551,7 @@
         }
 
         async function awardWinMoney(amount) {
-            if(isSpectator || !db || !currentPlayerName || amount <= 0) return; 
+            if(window.isSpectator || !db || !currentPlayerName || amount <= 0) return; 
             const weekId = getWeekString(0);
             const docId = `${currentPlayerName}_${weekId}`; 
             const playerRef = doc(db, "leaderboard", docId);
@@ -565,7 +565,7 @@
         function generateRoomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
         async function cleanupRoom() {
-            if (isOnlineMode && !isSpectator && currentRoomCode && db) {
+            if (isOnlineMode && !window.isSpectator && currentRoomCode && db) {
                 try { await deleteDoc(doc(db, "rooms", currentRoomCode)); } catch(e) {}
             }
         }
@@ -573,8 +573,8 @@
         window.cleanupRoom = cleanupRoom;
 
         window.addEventListener('beforeunload', async () => {
-            if(!isSpectator) await cleanupRoom();
-            if(isSpectator && isOnlineMode && db && currentRoomCode) {
+            if(!window.isSpectator) await cleanupRoom();
+            if(window.isSpectator && isOnlineMode && db && currentRoomCode) {
                 try { await updateDoc(doc(db, "rooms", currentRoomCode), { viewers: arrayRemove(currentPlayerName) }); } catch(e){}
             }
         });
@@ -583,7 +583,7 @@
         DOM_LOBBY.soloBtn.addEventListener('click', () => {
             const name = DOM_LOBBY.nameInput.value.trim();
             if(!name) { alert("Kérlek írd be a neved a kezdéshez!"); return; }
-            currentPlayerName = name; isSpectator = false; isOnlineMode = false; gameState = { taskaErtekek: {} }; 
+            currentPlayerName = name; window.isSpectator = false; isOnlineMode = false; gameState = { taskaErtekek: {} }; 
             DOM_LOBBY.nameDisplay.textContent = name; DOM_LOBBY.roomDisplay.style.display = "none"; DOM_LOBBY.viewerDisplay.style.display = "none";
             DOM_LOBBY.screen.style.display = "none"; DOM_LOBBY.game.style.display = "flex";
             initGame();
@@ -593,13 +593,13 @@
             const name = DOM_LOBBY.nameInput.value.trim();
             if(!name) { alert("Kérlek írd be a neved a kezdéshez!"); return; }
             if(!db) { alert("A szerver jelenleg nem elérhető. Kérlek válaszd az Offline módot!"); return; }
-            currentPlayerName = name; isSpectator = false; isOnlineMode = true; gameState = { taskaErtekek: {} };
+            currentPlayerName = name; window.isSpectator = false; isOnlineMode = true; gameState = { taskaErtekek: {} };
             DOM_LOBBY.nameDisplay.textContent = name;
             currentRoomCode = generateRoomCode();
             DOM_LOBBY.roomSpan.textContent = currentRoomCode; DOM_LOBBY.roomDisplay.style.display = "inline-block"; DOM_LOBBY.viewerDisplay.style.display = "inline-block";
             
             try {
-                await setDoc(doc(db, "rooms", currentRoomCode), { host: name, created: new Date().toISOString(), viewers: [], gameState: {} });
+                await setDoc(doc(db, "rooms", currentRoomCode), { host: name, created: new Date().toISOString(), viewers:[], gameState: {} });
                 onSnapshot(doc(db, "rooms", currentRoomCode), (docSnap) => {
                     if (docSnap.exists()) { const data = docSnap.data(); if (data.viewers) DOM_LOBBY.viewerCountSpan.textContent = data.viewers.length; }
                 });
@@ -617,7 +617,7 @@
                 const roomSnap = await getDoc(roomRef);
                 
                 if(roomSnap.exists()) {
-                    isSpectator = true; isOnlineMode = true; gameState = { taskaErtekek: {} }; 
+                    window.isSpectator = true; isOnlineMode = true; gameState = { taskaErtekek: {} }; 
                     currentRoomCode = code;
                     const joinName = DOM_LOBBY.nameInput.value.trim() || "Néző_" + Math.floor(Math.random()*1000);
                     currentPlayerName = joinName;
@@ -663,7 +663,12 @@
                 { display: 'Gamer PC', value: 800000, type: 'targy' }, { display: 'Karibi Utazás', value: 3500000, type: 'targy' },
                 { display: 'Traktor', value: 5000000, type: 'targy' }, { display: 'Sportkocsi', value: 10000000, type: 'targy' },
                 { display: 'Repülőgép', value: 15000000, type: 'targy' }, { display: 'Új Autó', value: 20000000, type: 'targy' }, 
-                { display: 'Arany WC', value: 25000000, type: 'targy' }, { display: 'Kastély', value: 30000000, type: 'targy' },
+                { display: 'Gyémánt Fogpiszkáló', value: 22000000, type: 'targy' }, { display: 'Saját Műhold', value: 23000000, type: 'targy' },
+                { display: 'Platina Kuka', value: 24000000, type: 'targy' }, { display: 'Arany WC', value: 25000000, type: 'targy' }, 
+                { display: 'Lézerkard (Valódi)', value: 26000000, type: 'targy' }, { display: 'Időgép (Alkatrész)', value: 27000000, type: 'targy' },
+                { display: 'Vulkanikus Sziget', value: 28000000, type: 'targy' }, { display: 'Teleportáló Fülke', value: 29000000, type: 'targy' },
+                { display: 'Kastély', value: 30000000, type: 'targy' }, { display: 'Klónozó Berendezés', value: 31000000, type: 'targy' },
+                { display: 'Láthatatlan Helikopter', value: 32000000, type: 'targy' }, { display: 'Repülő Csészealj', value: 33000000, type: 'targy' },
                 { display: 'Tengeralattjáró', value: 40000000, type: 'targy' }, { display: 'Sziget', value: 50000000, type: 'targy' }
             ],
             vicc:[ 
@@ -705,7 +710,7 @@
             ]
         };
 
-        const BANKER_SURPRISE_JOKES = [
+        const BANKER_SURPRISE_JOKES =[
             "Használt buszjegy", "Kilyukadt esernyő", "Egy üveg csapvíz", "Fél csomag rágó", 
             "Lejárt kondibérlet", "Három szem szotyi", "Törött fogpiszkáló", "Két hetes falevél", 
             "Egy marék kavics", "Üres gyufásdoboz", "Lemerült elem", "Kifolyt tollbetét", 
@@ -729,8 +734,18 @@
             'Sportkocsi': "Brumm brumm... Ez a luxusverda kigördült a stúdióból!",
             'Repülőgép': "A magángéped felszállt... de te lenn maradtál!",
             'Új Autó': "Búcsúzz el az új autótól! Mehetsz továbbra is a békávéval.",
+            'Gyémánt Fogpiszkáló': "Legalább az ebédet kiszedhetted volna a fogad közül stílusosan!",
+            'Saját Műhold': "Oda a saját TV csatornád az űrből!",
+            'Platina Kuka': "A szemeted továbbra is műanyagban fog rohadni!",
             'Arany WC': "Oda a stílusos trón! Ezt már biztos nem viszed haza!",
+            'Lézerkard (Valódi)': "A Jedik sírnak, a Sith-ek röhögnek! Kiment a fénykard!",
+            'Időgép (Alkatrész)': "Ezt már nem tudod visszacsinálni, elszállt a jövő (vagy a múlt)!",
+            'Vulkanikus Sziget': "A gonosz főhadiszállásod oda, maradsz a panelban!",
+            'Teleportáló Fülke': "Marad a távolsági busz, a teleportálás elmarad!",
             'Kastély': "A kastély kapui végleg bezárultak előtted, felség!",
+            'Klónozó Berendezés': "Egy is elég belőled, a Bankár fellélegzett!",
+            'Láthatatlan Helikopter': "Úgysem láttad volna, hogy hova parkoltál vele!",
+            'Repülő Csészealj': "Az ufók visszakérik! Ezzel már nem mész a Marsra!",
             'Tengeralattjáró': "Glugy-glugy... A kapitányi sapkát elteheted.",
             'Sziget': "Oda a magánsziget! Marad a nyüzsgő balatoni szabadstrand.",
             'Lejárt lottószelvény': "Szuper! A tegnapi nyerőszámokkal amúgy se mentél volna sokra.",
@@ -778,7 +793,7 @@
             'Lejárt BKV jegy': "Azzal már biztos nem bliccelsz haza!"
         };
 
-        const BANKER_NEUTRAL_GOOD_TAUNTS = [
+        const BANKER_NEUTRAL_GOOD_TAUNTS =[
             "A Bankár most tépett szét egy szerződést dühében a vezérlőben.",
             "Hallani, ahogy a Bankár ököllel veri az asztalt!",
             "A Bankár felhívta a feleségét, hogy idén elmarad a Bahama-szigeteki nyaralás.",
@@ -792,7 +807,7 @@
             "Huh... A gép szerint is elképesztő formában vagy. A Bankár izzad!"
         ];
 
-        const BANKER_NEUTRAL_BAD_TAUNTS = [
+        const BANKER_NEUTRAL_BAD_TAUNTS =[
             "A Bankár hátradőlt, kényelmesen kortyolgatja a pezsgőjét.",
             "A Bankár feltette a lábát az asztalra, ezt a játékot már megnyerte.",
             "Egy gúnyos kacaj visszhangzik a vezérlőből.",
@@ -806,7 +821,7 @@
             "Tökéletes! A kiszemelt jachtom máris a kosárban van! – mondja a Bankár."
         ];
 
-        const BANKER_STREAK_BAD = [
+        const BANKER_STREAK_BAD =[
             "Már zsinórban hullanak a nagyok! Kész katasztrófa a játékod!",
             "A Bankár most nyitott meg egy üveg drága bort a tiszteletedre.",
             "Egy újabb gigantikus összeg a kukában. Zsinórban a harmadik! Brutális...",
@@ -814,7 +829,7 @@
             "Ezt nem hiszem el! Szabadesésben a nyereményed, a Bankár pedig táncol örömében!"
         ];
 
-        const BANKER_STREAK_GOOD = [
+        const BANKER_STREAK_GOOD =[
             "Zsinórban tisztul a tábla apróktól! A Bankár dühöng!",
             "Elképesztő széria! Egyetlen apró sem menekülhet! A Bankár sír!",
             "Mesteri sorozat! A Bankár már az irodája ablakán akar kiugrani!",
@@ -822,7 +837,7 @@
             "Valaki állítsa meg ezt az embert! A Bankár könyörög, hogy ronts el egyet!"
         ];
 
-        const BIG_LOSS_COMBO_TAUNTS = [
+        const BIG_LOSS_COMBO_TAUNTS =[
             "Előbb a(z) {elozo}, most meg a(z) {mostani}?! A Bankár pezsgőt bontott!",
             "Ezt nem hiszem el! Odalett a(z) {elozo}, és most még a(z) {mostani} is?!",
             "A Bankár fetreng a nevetéstől! A(z) {elozo} után elbuktad a(z) {mostani}-t is!",
@@ -832,7 +847,7 @@
             "Mintha egy rémálomban lennél: {elozo} oda, és most a(z) {mostani} is eltűnt!"
         ];
 
-        const BLUFF_TAUNTS = [
+        const BLUFF_TAUNTS =[
             "Én belelátok a táskákba... Csak szólok, a tiédben egy kacat lapul!",
             "Blöffölök vagy sem? Lehet, hogy nálad van a fődíj... de lehet, hogy csak 100 forint.",
             "Szerintem cserélned kéne... a kamerákon látom, hogy üres a táskád!",
@@ -840,7 +855,7 @@
             "Ne bízz magadban túlságosan. Amit most csinálsz, az a vesztedbe rohanás."
         ];
 
-        const EPIC_WIN_MESSAGES = [
+        const EPIC_WIN_MESSAGES =[
             "TÖRTÉNELMI GYŐZELEM! A stúdió felrobban, a Bankár zokog!",
             "ELKÉPESZTŐ! A legendák közé emelkedtél ezzel a játékkal!",
             "ZSENIÁLIS! Erre évek múlva is emlékezni fog mindenki!",
@@ -908,7 +923,7 @@
         function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
         async function syncGameState() {
-            if(!db || !currentRoomCode || isSpectator || !isOnlineMode) return;
+            if(!db || !currentRoomCode || window.isSpectator || !isOnlineMode) return;
             try {
                 const kiesettPenzfaIds = Array.from(document.querySelectorAll('.penzfa-elem.kiesett')).map(el => el.dataset.uid);
                 
@@ -918,6 +933,7 @@
                     isFlipped: DOM.infoFlipper.classList.contains('flipped'), backCim: DOM.backCim.innerHTML, backOsszeg: DOM.backOsszeg.innerHTML,
                     backLeiras: DOM.backLeiras.innerHTML, kiesettPenzfaIds: kiesettPenzfaIds, ajanlatListaHtml: DOM.ajanlatLista.innerHTML,
                     ajanlatTortenetRejtett: DOM.ajanlatTortenet.classList.contains('rejtett'), boardClass: document.body.className,
+                    isEpicWin: document.getElementById('fireworks-container') !== null,
                     powerups: {
                         rontgen: { text: DOM.powerupGomb.innerHTML, disabled: DOM.powerupGomb.disabled },
                         panik: { text: DOM.panikGomb.innerHTML, disabled: DOM.panikGomb.disabled },
@@ -962,6 +978,7 @@
             }
 
             if(data.boardClass !== undefined) { document.body.className = data.boardClass; }
+            if(data.isEpicWin && !document.getElementById('fireworks-container')) { startCelebration(); }
 
             if(data.powerups) {
                 DOM.powerupGomb.innerHTML = data.powerups.rontgen.text; DOM.powerupGomb.disabled = true;
@@ -1016,8 +1033,9 @@
         }
 
         function startCelebration() {
+            if(document.getElementById('fireworks-container')) return;
             const container = document.createElement('div'); container.id = 'fireworks-container'; document.querySelector('.container').appendChild(container);
-            const colors = ['#f8b500', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#fff'];
+            const colors =['#f8b500', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#fff'];
             for (let i = 0; i < 300; i++) {
                 const conf = document.createElement('div'); conf.className = 'confetti'; conf.style.left = Math.random() * 100 + 'vw'; conf.style.top = -10 - Math.random() * 20 + 'vh';
                 conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -1066,7 +1084,7 @@
                 const taskaElem = document.createElement('div'); taskaElem.className = 'taska' + (i === rejtelyesId ? ' rejtelyes' : ''); 
                 taskaElem.dataset.taskaId = i;
                 taskaElem.innerHTML = `<div class="taska-front"><div class="taska-szam">${i}</div></div><div class="taska-hatlap"><div class="taska-osszeg">${kevertNyeremenyek[i-1].display}</div></div>`;
-                if(!isSpectator) { taskaElem.addEventListener('click', () => handleTaskaClick(i)); }
+                if(!window.isSpectator) { taskaElem.addEventListener('click', () => handleTaskaClick(i)); }
                 DOM.taskaRacs.appendChild(taskaElem);
             }
         }
@@ -1087,10 +1105,10 @@
             gameState = { 
                 allapot: 'sajat_valasztas', sajatTaska: null, taskaErtekek: {}, maradekNyeremenyek:[...nyeremenyek], 
                 aktualisKor: 0, megNyitando: NYITASI_SZAMLALO[0], offerHistory:[], nyertOsszeg: 0, bonuszPenz: 0,
-                marEladta: false, lilaSajat: false, isProcessingClick: false, initialAverage: initialAverage, badStreak: 0, goodStreak: 0, elvesztettNagyok: [], 
+                marEladta: false, lilaSajat: false, isProcessingClick: false, initialAverage: initialAverage, badStreak: 0, goodStreak: 0, elvesztettNagyok:[], 
                 hasznaltRontgen: false, isRontgenAktiv: false, rontgenLejart: false, hasznaltPanikgomb: false, hasznaltVisszaajanlas: false,
                 shieldCount: 1, isPajzsAktiv: false, shieldCaseId: Math.floor(Math.random() * TOTAL_CASES) + 1, kihivasBuntetes: false, kihivasEredetiAjanlat: 0,
-                hasznaltRadar: false, isRadarAktiv: false, timeMachinePenalty: 0, isBlackout: false, blackoutKinyitott: []
+                hasznaltRadar: false, isRadarAktiv: false, timeMachinePenalty: 0, isBlackout: false, blackoutKinyitott:[]
             };
             
             rejtFlipAjanlat(); DOM.ajanlatTortenet.classList.add('rejtett'); DOM.ajanlatLista.innerHTML = ''; 
@@ -1103,7 +1121,7 @@
             mutassUzenetet("Kezdődik a játék!", "Kattints arra a táskára, amit hazavinnél!");
             renderBoard(nyeremenyek, kevertNyeremenyek, rejtelyesId);
 
-            if(isOnlineMode && !isSpectator) {
+            if(isOnlineMode && !window.isSpectator) {
                 updateDoc(doc(db, "rooms", currentRoomCode), { boardLayout: nyeremenyek, casesLayout: kevertNyeremenyek, rejtelyesId: rejtelyesId }).then(() => syncGameState());
             }
         }
@@ -1279,7 +1297,7 @@
             
             gameState.maradekNyeremenyek = gameState.maradekNyeremenyek.filter(n => n.uId !== nyeremeny.uId);
             
-            const newAtlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / gameState.maradekNyeremenyek.length;
+            const newAtlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / Math.max(1, gameState.maradekNyeremenyek.length);
             const boardHealth = newAtlag / gameState.initialAverage;
             frissitStudioHangulat(boardHealth);
             
@@ -1321,7 +1339,7 @@
             await wait(2500);
 
             const currentMax = Math.max(...gameState.maradekNyeremenyek.map(n => n.value));
-            if (!gameState.marEladta && nyeremeny.value > currentMax && nyeremeny.value >= 10000000 && Math.random() < 0.05 && !bypassBlackoutCheck) {
+            if (gameState.maradekNyeremenyek.length > 2 && !gameState.marEladta && nyeremeny.value > currentMax && nyeremeny.value >= 10000000 && Math.random() < 0.05 && !bypassBlackoutCheck) {
                 mutassUzenetet("A GÉP LEÁLLT!", "A Bankár hív... Nagyon furcsa dolog történik!", "", true); await wait(3000);
                 let timeMachineOffer = await triggerIdoGep(nyeremeny, id, taskaElem);
                 if(timeMachineOffer) return; 
@@ -1353,7 +1371,7 @@
         async function triggerIdoGep(nyeremeny, id, taskaElem) {
             return new Promise((resolve) => {
                 let text = `Látom, hogy nagyon fáj a(z) <b>${nyeremeny.display}</b> elvesztése.<br>Felajánlom az <b>IDŐGÉPET!</b><br>Visszarakom a táblára ezt a táskát, ÚJRA BEZÁROM. De az ára: <span style="color:#ef4444">A bónuszod elveszik, és a következő 3 ajánlatod felére csökken!</span>`;
-                mutassFlipAjanlat("⏳ AZ IDŐGÉP", "Második esély!", text, [
+                mutassFlipAjanlat("⏳ AZ IDŐGÉP", "Második esély!", text,[
                     { szoveg: "ELFOGADOM! Kérem vissza a táskát!", osztaly: "btn-fekete", akcio: async () => {
                         rejtFlipAjanlat(); mutassUzenetet("AZ IDŐ VISSZAPÖRÖG...", "A Bankár varázsol!", ""); await wait(2000);
                         
@@ -1449,7 +1467,7 @@
                 
                 document.querySelectorAll('.taska.nyitott .taska-hatlap .taska-osszeg').forEach(el => el.style.display = 'block');
                 
-                gameState.isBlackout = false; gameState.blackoutKinyitott = [];
+                gameState.isBlackout = false; gameState.blackoutKinyitott =[];
                 mutassUzenetet("KATASTROFA VAGY MÁK?", "Az asztal frissítve. Most jön az ajánlat!", ""); await wait(3000);
             }
 
@@ -1477,7 +1495,7 @@
 
             if (gameState.marEladta) {
                 let text = "Ezt az összeget ajánlotta volna most a Bankár.<br><span style='color: #10b981; font-size: 0.95rem; font-weight: bold; margin-top: 10px; display: block;'>Automatikus folytatás a következő körre...</span>";
-                mutassFlipAjanlat("MI LETT VOLNA HA...", formatValuta(ajanlatErtek), text, []);
+                mutassFlipAjanlat("MI LETT VOLNA HA...", formatValuta(ajanlatErtek), text,[]);
                 setTimeout(() => { mutassUzenetet("Kijátszás folytatódik...", "Lássuk mi maradt!"); rejtFlipAjanlat(); setTimeout(kovetkezoKor, 400); }, 3000); return;
             }
 
@@ -1485,14 +1503,11 @@
 
             let valasztottTwist = null;
             
-            // ÚJ LOGIKA: A végjátékban sokkal agresszívebb a Bankár! (4, 5, 6 körökben)
             if (!gameState.marEladta && gameState.aktualisKor >= 4 && Math.random() < 0.6) {
-                // 60% esély egy szemétláda húzásra a vége felé!
-                const brutalTwists = ['shuffle', 'shuffle', 'blackout', 'zsarolas', 'hostage'];
+                const brutalTwists =['shuffle', 'shuffle', 'blackout', 'zsarolas', 'hostage'];
                 valasztottTwist = getRandomElem(brutalTwists);
             } else if (Math.random() < 0.65) { 
-                // Hagyományos, enyhébb twistek a korábbi körökben
-                const availableTwists = ['idozitett_bomba', 'kihivas', 'orosz_rulett', 'rejtett_bonusz', 'shell_game'];
+                const availableTwists =['idozitett_bomba', 'kihivas', 'orosz_rulett', 'rejtett_bonusz', 'shell_game'];
                 if (gameState.aktualisKor <= 4) availableTwists.push('sugo', 'sugo');
                 if (gameState.aktualisKor >= 2) availableTwists.push('kombo', 'felezo_duplazo', 'vak_csere_penzzel', 'szerencsekerek', 'szabad_csere', 'zsarolas');
                 if (gameState.aktualisKor >= 3) availableTwists.push('vak_alku', 'rulett', 'harom_doboz', 'targy_csomag', 'shuffle', 'blackout', 'hostage');
@@ -1527,7 +1542,7 @@
 
         function calculateBankerOffer() {
             const maradekDb = gameState.maradekNyeremenyek.length;
-            const atlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / maradekDb;
+            const atlag = gameState.maradekNyeremenyek.reduce((a, b) => a + b.value, 0) / Math.max(1, maradekDb);
             const maxVal = Math.max(...gameState.maradekNyeremenyek.map(n => n.value));
             const progress = gameState.aktualisKor / (NYITASI_SZAMLALO.length - 1); 
             let percentage = 0.15 + (progress * 0.75); 
@@ -1551,7 +1566,7 @@
 
         function bankarBlackout(alapAjanlat) {
             let leiras = `A Bankár zseniális alkut ajánl, de fenyegetőzik: <br><span style='color:#fca5a5; font-weight:bold;'>Ha elutasítod, lekapcsolja a villanyt, összekeveri a táskákat, és a következő nyitásokat a SÖTÉTBEN kell megtenned!</span>`;
-            mutassFlipAjanlat("FENYEGETÉS: ÁRAMSZÜNET!", formatValuta(alapAjanlat), leiras, [
+            mutassFlipAjanlat("FENYEGETÉS: ÁRAMSZÜNET!", formatValuta(alapAjanlat), leiras,[
                 { szoveg: "Megveszem, nincs sötét!", osztaly: "btn-elfogad", akcio: () => { rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad', null, "Megúsztad a sötétet"); }},
                 { szoveg: "Nem érdekel, lekapcsolhatod!", osztaly: "btn-elutasit", akcio: async () => {
                     rejtFlipAjanlat(); rogzitAjanlat(formatValuta(alapAjanlat), 'Elutasítva (Áramszünet jön)');
@@ -1561,7 +1576,6 @@
                     
                     document.body.classList.add('bg-blackout'); gameState.isBlackout = true; 
                     
-                    // --- TRÜKKÖS KEVERÉS A SÖTÉTBEN ---
                     const closedCases = Array.from(document.querySelectorAll('.taska:not(.nyitott)'));
                     const closedIds = closedCases.map(t => t.dataset.taskaId);
                     const values = closedIds.map(id => gameState.taskaErtekek[id]);
@@ -1612,7 +1626,7 @@
             target1.classList.add('tusz-celpont'); target2.classList.add('tusz-celpont'); syncGameState();
             
             let leirasHTML = `A Bankár TÚSZUL EJTETT két táskát (pirosan villognak)! <br><span style='color:#fca5a5; font-weight:bold;'>Ha elutasítod ezt az ajánlatot, A BANKÁR AZONNAL KINYITJA EZT A KETTŐT! Lehet, hogy köztük van a fődíj!</span>`;
-            mutassFlipAjanlat("TÚSZDRÁMA!", formatValuta(alapAjanlat), leirasHTML, [
+            mutassFlipAjanlat("TÚSZDRÁMA!", formatValuta(alapAjanlat), leirasHTML,[
                 { szoveg: "Engedek... Áll az Alku!", osztaly: "btn-elfogad", akcio: () => {
                     document.querySelectorAll('.tusz-celpont').forEach(t => t.classList.remove('tusz-celpont')); syncGameState();
                     rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad', null, "Túszdráma elfogadva");
@@ -1636,7 +1650,7 @@
 
         function bankarKeveres(alapAjanlat) {
             let leirasHTML = `A Bankár felajánl egy korrekt összeget... DE fenyegetőzik!<br><span style='color:#fca5a5; font-weight:bold;'>Ha nem fogadod el, a Bankár AZONNAL ÖSSZEKEVERI az összes asztalon lévő zárt táska (és a sajátod) tartalmát! Vakon repülsz tovább!</span>`;
-            mutassFlipAjanlat("AJÁNLAT VAGY KEVERÉS!", formatValuta(alapAjanlat), leirasHTML, [
+            mutassFlipAjanlat("AJÁNLAT VAGY KEVERÉS!", formatValuta(alapAjanlat), leirasHTML,[
                 { szoveg: "Áll az Alku! Kérem a pénzt!", osztaly: "btn-elfogad", akcio: () => {
                     rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad', null, "Keverés megúszva");
                 }},
@@ -1682,7 +1696,7 @@
 
         function bankarZsarolas(alapAjanlat) {
             let leirasHTML = `A Bankár megzsarolt! Ha elutasítod ezt az ajánlatot, <b>AZONNAL KINYITJA A LEGNAGYOBB MEGMARADT TÁSKÁT!</b><br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végső nyereményed.)</span>`;
-            mutassFlipAjanlat("BANKÁRI ZSAROLÁS!", formatValuta(alapAjanlat), leirasHTML, [
+            mutassFlipAjanlat("BANKÁRI ZSAROLÁS!", formatValuta(alapAjanlat), leirasHTML,[
                 { szoveg: "Engedek... Áll az Alku!", osztaly: "btn-elfogad", akcio: () => {
                     rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad', null, "Zsarolás elfogadva");
                 }},
@@ -1709,7 +1723,7 @@
         function bankarRejtettBonus(alapAjanlat) {
             let osszegHTML = formatValuta(alapAjanlat);
             let leiras = `Ha elfogadod, garantáltan a tiéd ez az összeg.<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`;
-            mutassFlipAjanlat("A Bankár Ajánlata:", osszegHTML, leiras, [
+            mutassFlipAjanlat("A Bankár Ajánlata:", osszegHTML, leiras,[
                 { szoveg: "Áll az Alku!", osztaly: "btn-elfogad", akcio: () => { rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad'); }},
                 { szoveg: "Nincs alku!", osztaly: "btn-elutasit", akcio: async () => {
                     rejtFlipAjanlat(); gameState.isProcessingClick = true;
@@ -1722,7 +1736,7 @@
 
         function bankarKihivasa(alapAjanlat) {
             let leirasHTML = `A Bankár párbajra hív! Állítsd meg a játékot és nyiss ki <b>azonnal 1 táskát!</b><br>Ha kisebb mint 1 Millió: <span style="color:#10b981">+500.000 Ft Bónusz!</span><br>Ha 1 Millió vagy nagyobb: <span style="color:#ef4444">A következő ajánlatod -25% kap!</span>`;
-            mutassFlipAjanlat("A BANKÁR KIHÍVÁSA!", "Elfogadod?", leirasHTML, [
+            mutassFlipAjanlat("A BANKÁR KIHÍVÁSA!", "Elfogadod?", leirasHTML,[
                 { szoveg: "Állom a sarat! Kihívás elfogadva!", osztaly: "btn-extra", akcio: () => {
                     rejtFlipAjanlat(); gameState.kihivasEredetiAjanlat = alapAjanlat; gameState.allapot = 'kihivas_nyitas'; gameState.isProcessingClick = false;
                     mutassUzenetet("KIHÍVÁS INDUL!", "Nyiss ki egy táskát MOST AZONNAL!", "Vigyázz, nehogy a milliókat találd el!");
@@ -1736,19 +1750,19 @@
             const szuperAjanlat = Math.round((alapAjanlat * 1.5) / 1000) * 1000;
             let leirasHTML = `Válassz a 6 kamra közül! 5 gomb alatt a hatalmas <span style="color:#10b981">${formatValuta(szuperAjanlat)}</span> lapul.<br>De 1 gomb alatt a <span style="color:#ef4444">CSŐD (100 Ft)</span>! A választásod a végső nyereményed lesz!`;
             
-            const gombok = [
+            const gombok =[
                 { szoveg: "Kérem a normál ajánlatot", osztaly: "btn-elutasit", akcio: () => { rejtFlipAjanlat(); bankarAjanlatotTesz(alapAjanlat); }},
                 { szoveg: "BEVÁLLALOM! HOZD A GOMBOKAT!", osztaly: "btn-fekete", akcio: () => {
-                    const chambers = [szuperAjanlat, szuperAjanlat, szuperAjanlat, szuperAjanlat, szuperAjanlat, 100]; const shuffledChambers = kever([...chambers]);
+                    const chambers =[szuperAjanlat, szuperAjanlat, szuperAjanlat, szuperAjanlat, szuperAjanlat, 100]; const shuffledChambers = kever([...chambers]);
                     const kamraGombok = shuffledChambers.map((ertek, idx) => ({
                         szoveg: `${idx + 1}`, osztaly: "btn-rulett-kamra", akcio: async () => {
                             rejtFlipAjanlat(); mutassUzenetet("RAVASZ MEGHÚZVA...", "Vajon mi volt a kamrában?", "", true); await wait(3000);
                             if(ertek === 100) {
-                                ujraFlipAjanlat("BUMM! CSŐD!", "100 Ft", "Eltaláltad az üres kamrát! Mindent elvesztettél!", [
+                                ujraFlipAjanlat("BUMM! CSŐD!", "100 Ft", "Eltaláltad az üres kamrát! Mindent elvesztettél!",[
                                     { szoveg: "Tovább a Kijátszáshoz", osztaly: "btn-vegso", akcio: () => { rejtFlipAjanlat(); alkuKezelese(100, 'elfogad', null, "Orosz Rulett (Csőd)"); }}
                                 ]);
                             } else {
-                                ujraFlipAjanlat("KLIKK! TÚLÉLTED!", formatValuta(szuperAjanlat), "Gratulálok! Megnyerted a megnövelt ajánlatot!", [
+                                ujraFlipAjanlat("KLIKK! TÚLÉLTED!", formatValuta(szuperAjanlat), "Gratulálok! Megnyerted a megnövelt ajánlatot!",[
                                     { szoveg: "Tovább a Kijátszáshoz", osztaly: "btn-vegso", akcio: () => { rejtFlipAjanlat(); alkuKezelese(szuperAjanlat, 'elfogad', null, "Orosz Rulett (Siker)"); }}
                                 ]);
                             }
@@ -1765,7 +1779,7 @@
             let timeLeft = 10;
             let leirasHTML = `<div style="color:#ef4444; font-weight:bold; font-size:1.2rem; margin-bottom:5px;">CSAK 10 MÁSODPERCED VAN!</div><div id="timer-bar-container"><div id="timer-bar"></div></div>Azonnal dönts, vagy az ajánlat megsemmisül!`;
 
-            mutassFlipAjanlat("IDŐZÍTETT BOMBA!", formatValuta(bombaAjanlat), leirasHTML, [
+            mutassFlipAjanlat("IDŐZÍTETT BOMBA!", formatValuta(bombaAjanlat), leirasHTML,[
                 { szoveg: "Gyorsan, Áll az Alku!", osztaly: "btn-elfogad", akcio: () => { clearInterval(timeBombInterval); rejtFlipAjanlat(); alkuKezelese(bombaAjanlat, 'elfogad', null, "Időzített Bomba"); }},
                 { szoveg: "Nem kérem!", osztaly: "btn-elutasit", akcio: () => { clearInterval(timeBombInterval); rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elutasit'); }}
             ]);
@@ -1775,7 +1789,7 @@
                 timeLeft -= 0.1; if(timerBar) timerBar.style.width = (timeLeft / 10) * 100 + '%';
                 if (timeLeft <= 0) {
                     clearInterval(timeBombInterval);
-                    ujraFlipAjanlat("AZ IDŐ LEJÁRT!", formatValuta(rosszAjanlat), "Túl lassú voltál! A Bankár büntetésből csökkentette az ajánlatot!", [
+                    ujraFlipAjanlat("AZ IDŐ LEJÁRT!", formatValuta(rosszAjanlat), "Túl lassú voltál! A Bankár büntetésből csökkentette az ajánlatot!",[
                         { szoveg: "Áll az Alku", osztaly: "btn-elfogad", akcio: () => { rejtFlipAjanlat(); alkuKezelese(rosszAjanlat, 'elfogad', null, "Büntetés Ajánlat"); }},
                         { szoveg: "Nincs alku", osztaly: "btn-elutasit", akcio: () => { rejtFlipAjanlat(); alkuKezelese(rosszAjanlat, 'elutasit'); }}
                     ]);
@@ -1785,7 +1799,7 @@
 
         function mutassVisszaajanlasPanel(alapAjanlat) {
             let leirasHTML = `Írj be egy összeget! Ha nem vagy túl pofátlan, a Bankár rábólint.<br>De vigyázz, ha túl sokat kérsz, büntetésből levon 20%-ot!<br><br><input type="number" id="alku-input" placeholder="Ajánlatod (Ft)">`;
-            mutassFlipAjanlat("TE JÖSSZ! ALKUDOZZ!", "Visszaajánlás", leirasHTML, [
+            mutassFlipAjanlat("TE JÖSSZ! ALKUDOZZ!", "Visszaajánlás", leirasHTML,[
                 { szoveg: "Küldés a Bankárnak!", osztaly: "btn-extra", akcio: async () => {
                     const inputVal = parseInt(document.getElementById('alku-input').value);
                     if(!inputVal || inputVal <= 0) return;
@@ -1800,7 +1814,7 @@
                         alkuKezelese(inputVal, 'elfogad', null, "Sikeres Visszaajánlás");
                     } else {
                         const buntetesAjanlat = Math.round((alapAjanlat * 0.8) / 100) * 100;
-                        ujraFlipAjanlat("A BANKÁR DÜHÖS!", formatValuta(buntetesAjanlat), `Túl kapzsi voltál! A Bankár megsértődött, és büntetésből 20%-ot levont az eredeti ajánlatból!`, [
+                        ujraFlipAjanlat("A BANKÁR DÜHÖS!", formatValuta(buntetesAjanlat), `Túl kapzsi voltál! A Bankár megsértődött, és büntetésből 20%-ot levont az eredeti ajánlatból!`,[
                             { szoveg: "Kénytelen vagyok elfogadni", osztaly: "btn-elfogad", akcio: () => { rejtFlipAjanlat(); alkuKezelese(buntetesAjanlat, 'elfogad', null, "Büntetett Ajánlat"); }},
                             { szoveg: "Nincs alku", osztaly: "btn-elutasit", akcio: () => { rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elutasit'); }}
                         ]);
@@ -1818,7 +1832,7 @@
                 leiras = `A Bankár megőrült! A pénz mellé ODAADJA ezt is! <br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`; 
             } else { leiras += `<br><span style='color:#fca5a5; font-weight:bold;'>(Ha elfogadod, ez lesz a végleges nyereményed!)</span>`; }
             
-            let gombok = [
+            let gombok =[
                 { szoveg: "Áll az Alku!", osztaly: "btn-elfogad", akcio: () => {
                     mutassUzenetet("Döntés rögzítve!", "Adminisztráció..."); rejtFlipAjanlat(); 
                     alkuKezelese(ajanlatErtek, 'elfogad', pluszTargy, isPanicMode ? "Pánik Ajánlat" : null);
@@ -1843,28 +1857,6 @@
                 { szoveg: "Kérem a pénzt!", osztaly: "btn-elfogad", akcio: () => { mutassUzenetet("Döntés rögzítve!", "Adminisztráció..."); rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elfogad', null, "Pénz csere helyett"); }},
                 { szoveg: "Cserélni akarok!", osztaly: "btn-extra", akcio: () => { mutassUzenetet("SZABAD CSERE!", "Kattints arra a zárt táskára, amelyikre el akarod cserélni a sajátodat!"); rejtFlipAjanlat(); gameState.allapot = 'szabad_csere'; gameState.isProcessingClick = false; }},
                 { szoveg: "Nincs alku!", osztaly: "btn-elutasit", akcio: () => { mutassUzenetet("Döntés rögzítve!", "Megyünk tovább..."); rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elutasit'); }}
-            ]);
-        }
-
-        function bankarOtKotegAjanlat(alapAjanlat) {
-            let leiras = `5 boríték! Egy vagyon, vagy szemét van bennük.<br><span style='color:#fca5a5; font-weight:bold;'>(Ha húzol, az lesz a végleges nyereményed!)</span>`;
-            mutassFlipAjanlat("5 PÉNZKÖTEG", "Választhatsz!", leiras,[
-                { szoveg: "Húzok egy köteget!", osztaly: "btn-elfogad", akcio: () => {
-                    mutassUzenetet("Borítékok előkészítése...", "Melyiket választod?"); rejtFlipAjanlat();
-                    const viccek = MASTER_PRIZES.vicc.map(v=>v.display); const kotegek =[ alapAjanlat*1.5, alapAjanlat*0.3, getRandomElem(viccek), alapAjanlat*0.8, 1 ];
-                    const kevert = kever([...kotegek]);
-                    const gombok = kevert.map((k, idx) => ({
-                        szoveg: `${idx+1}. Köteg`, osztaly: "btn-koteg", akcio: async () => {
-                            mutassUzenetet("Köteg kibontása...", "Vajon mi van benne?", ""); rejtFlipAjanlat(); await wait(1800);
-                            let nyert = k; if(typeof k === 'number') nyert = Math.round(k/1000)*1000;
-                            ujraFlipAjanlat("EZT HÚZTAD:", formatNyeremeny(nyert), "Ez lett a végső nyereményed!",[
-                                { szoveg: "Tovább a Kijátszáshoz", osztaly: "btn-vegso", akcio: () => { mutassUzenetet("Döntés rögzítve!", "Lássuk mi volt a sajátodban!"); rejtFlipAjanlat(); alkuKezelese(nyert, 'elfogad', null, "5 Köteg"); }}
-                            ]);
-                        }
-                    }));
-                    ujraFlipAjanlat("VÁLASSZ EGY KÖTEGET!", "Melyik legyen?", "Kattints az egyik borítékra!", gombok);
-                }},
-                { szoveg: "Nem érdekel!", osztaly: "btn-elutasit", akcio: () => { mutassUzenetet("Döntés rögzítve!", "Megyünk tovább..."); rejtFlipAjanlat(); alkuKezelese(alapAjanlat, 'elutasit'); }}
             ]);
         }
 
@@ -1953,7 +1945,7 @@
                     rejtFlipAjanlat();
                     const opciok =[ { szorzo: 0.5, szoveg: "A FELE (50%)" }, { szorzo: 1, szoveg: "Normál (100%)" }, { szorzo: 2, szoveg: "A DUPLÁJA (200%)" } ];
                     let spinning = true; let stopping = false; let duration = 0; let stopTime = 0; let delay = 30; let currentIndex = 0; let startTime = Date.now();
-                    mutassUzenetet("Készülj a megállításra!", `<button id="stop-rulett-btn" class="stop-btn">STOP</button>`, "");
+                    mutassUzenetet("Készülj a megállításra!", `<button id="stop-rulett-btn" class="stop-btn" style="background:#f59e0b; padding:8px 15px; border-radius:5px; border:none; font-weight:bold; cursor:pointer;">STOP</button>`, "");
                     const stopBtn = document.getElementById('stop-rulett-btn');
 
                     stopBtn.addEventListener('click', () => {
@@ -2008,10 +2000,19 @@
 
                 rogzitAjanlat(historySzoveg, 'Elfogadva'); gameState.allapot = 'alku_elfogadva_kijatszas';
                 mutassUzenetet(`ÁLL AZ ALKU! Megnyerted ezt: ${formatNyeremeny(ajanlatErtek)}!${uzenetKiegeszites}`, `De a játék megy tovább. Lássuk a kijátszást!`);
-                setTimeout(kovetkezoKor, 4500);
+                
+                // Clear any potential block and allow next round
+                setTimeout(() => {
+                    gameState.isProcessingClick = false; 
+                    kovetkezoKor();
+                }, 4500);
             } else {
                 rogzitAjanlat(formatValuta(ajanlatErtek), 'Elutasítva');
-                mutassUzenetet("Nincs alku!", "Megyünk tovább. Bátor döntés!"); setTimeout(kovetkezoKor, 2000);
+                mutassUzenetet("Nincs alku!", "Megyünk tovább. Bátor döntés!"); 
+                setTimeout(() => {
+                    gameState.isProcessingClick = false;
+                    kovetkezoKor();
+                }, 2000);
             }
         }
 
@@ -2030,6 +2031,15 @@
         function finalShowdown() {
             const maradekTaskak = Array.from(document.querySelectorAll('.taska:not(.nyitott)'));
             const masikTaskaElem = maradekTaskak.find(t => t.dataset.taskaId != gameState.sajatTaska);
+            if (!masikTaskaElem) {
+                // Biztosító ág ha valamiért elcsúszott volna
+                gameState.allapot = 'vegsokattintas'; 
+                document.querySelector(`.taska[data-taska-id='${gameState.sajatTaska}']`).classList.add('villogo-vegsokattintas');
+                syncGameState();
+                mutassUzenetet("A VÉGSŐ PILLANAT!", "Kattints rá, és derítsük ki végre, hogy mi volt nálad végig!");
+                gameState.isProcessingClick = false; return;
+            }
+
             const masikId = masikTaskaElem.dataset.taskaId;
             DOM.panikGomb.disabled = true; DOM.pajzsGomb.disabled = true; DOM.radarGomb.disabled = true;
 
@@ -2038,7 +2048,7 @@
             const vegsoAjanlat = Math.round(((ertek1 + ertek2) / 2 * 0.95) / 1000) * 1000;
 
             if (gameState.marEladta) {
-                mutassFlipAjanlat("UTOLSÓ BANKÁRI AJÁNLAT", formatValuta(vegsoAjanlat), `A Bankár utolsó ajánlata ez lett volna. Már csak a sajátod (${gameState.sajatTaska}) és a(z) ${masikId}. maradt.<br><span style='color: #10b981; font-size: 0.95rem; font-weight: bold; margin-top: 10px; display: block;'>Automatikus folytatás az utolsó nyitáshoz...</span>`, []);
+                mutassFlipAjanlat("UTOLSÓ BANKÁRI AJÁNLAT", formatValuta(vegsoAjanlat), `A Bankár utolsó ajánlata ez lett volna. Már csak a sajátod (${gameState.sajatTaska}) és a(z) ${masikId}. maradt.<br><span style='color: #10b981; font-size: 0.95rem; font-weight: bold; margin-top: 10px; display: block;'>Automatikus folytatás az utolsó nyitáshoz...</span>`,[]);
                 setTimeout(() => {
                     mutassUzenetet("Kijátszás utolsó lépése!", `Kérlek, nyisd ki az idegen táskát (${masikId}.)!`);
                     rejtFlipAjanlat(); gameState.allapot = 'alku_elfogadva_kijatszas'; gameState.megNyitando = 1; gameState.isProcessingClick = false;
@@ -2057,7 +2067,7 @@
                     { szoveg: "Kérem a TITKOS SZÉFET!", osztaly: "btn-fekete", akcio: () => {
                         rejtFlipAjanlat(); mutassUzenetet("SZÉF KINYITÁSA...", "Vajon megérte?", "");
                         setTimeout(() => {
-                            ujraFlipAjanlat("A SZÉF TARTALMA:", formatValuta(szefErtek), "Ezt rejtette a Bankár széfje!", [
+                            ujraFlipAjanlat("A SZÉF TARTALMA:", formatValuta(szefErtek), "Ezt rejtette a Bankár széfje!",[
                                 { szoveg: "Lássuk mi volt a sajátomban!", osztaly: "btn-elfogad", akcio: () => befejezesKezelese(szefErtek, 'Titkos Széf', gameState.sajatTaska) }
                             ]);
                         }, 2500);
@@ -2108,7 +2118,7 @@
                 
                 let feketeLeiras = `A játék ugyan véget ért, de a Bankár küldött még valamit... <b>Egy Fekete Táskát!</b><br>Kockáztatsz az eddigi nyereményeddel (${formatValuta(currentTotal)})?<br>A táskában lehet: <span style="color:#10b981">2x, 1.5x</span>, de lehet <span style="color:#ef4444">0.5x, vagy 0x (MINDENT ELVESZTESZ)</span> is!`;
                 
-                mutassFlipAjanlat("A FEKETE TÁSKA", "Kinyitod?", feketeLeiras, [
+                mutassFlipAjanlat("A FEKETE TÁSKA", "Kinyitod?", feketeLeiras,[
                     { szoveg: "KINYITOM! KOCKÁZTATOK!", osztaly: "btn-fekete", akcio: async () => {
                         rejtFlipAjanlat(); mutassUzenetet("FEKETE TÁSKA NYÍLIK...", "Vajon mi lesz a szorzó?", ""); await wait(3000);
                         
@@ -2119,7 +2129,7 @@
                         else if(multi === 0.5) txt = `AUCS! A szorzó 0.5x lett! A nyereményed megfeleződött: ${formatValuta(currentTotal)}.`;
                         else txt = `TRAGÉDIA! A szorzó 0x lett! MINDENT ELVESZTETTÉL! A Bankár röhögve távozik!`;
                         
-                        ujraFlipAjanlat(`SZORZÓ: ${multi}x`, formatValuta(currentTotal), txt, [
+                        ujraFlipAjanlat(`SZORZÓ: ${multi}x`, formatValuta(currentTotal), txt,[
                             { szoveg: "Értékelés", osztaly: "btn-vegso", akcio: () => { rejtFlipAjanlat(); vegkifejletKiirasa(currentTotal, nyeremeny, isNumeric, baseWinnings); }}
                         ]);
                     }},
@@ -2153,13 +2163,14 @@
             if (isEpicWin) { endMessage = getRandomElem(EPIC_WIN_MESSAGES); startCelebration(); document.body.classList.add('bg-winning'); } 
             else if (isBigWin) { endMessage = getRandomElem(HAPPY_ENDINGS); } else { endMessage = getRandomElem(SAD_ENDINGS); }
 
-            if (isNumeric && finalTotal > 0 && !isSpectator && db) {
+            if (isNumeric && finalTotal > 0 && !window.isSpectator && db) {
                 awardWinMoney(finalTotal); endMessage += `<br><b style="color:#10b981;">(+ ${formatValuta(finalTotal)} a Heti Bajnokságban!)</b>`;
             }
             
             let ctaHtml = `<br><br><button id="final-lobby-btn" style="background:#f8b500; color:#000; padding:10px 20px; font-weight:bold; border-radius:5px; cursor:pointer; font-family:'Orbitron'; border:2px solid #fff; margin-top:10px;">Vissza a Lobbyba (Törli a kódot)</button>`;
 
             mutassUzenetet(finalString, `${choiceEval} ${endMessage} ${ctaHtml}`); gameState.isProcessingClick = true; 
+            syncGameState();
 
             setTimeout(() => {
                 const btn = document.getElementById('final-lobby-btn');
